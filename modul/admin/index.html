@@ -4,24 +4,54 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Control Center</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     <div class="app-header">
-        <div style="font-weight:bold;">CONTROL CENTER</div>
-        <button class="back-btn" onclick="localStorage.clear(); window.location.href='login.html'"><i class="fas fa-power-off"></i> Logout</button>
+        <div style="font-weight:bold;">COMMAND CENTER</div>
+        <i class="fas fa-power-off" onclick="localStorage.clear(); window.location.href='login.html'"></i>
     </div>
     <div class="container">
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h4 style="margin:0;">Laporan Mingguan</h4>
-                <button onclick="window.print()" class="back-btn" style="background:#444; font-size:11px;"><i class="fas fa-print"></i> Cetak PDF</button>
-            </div>
-            <table>
-                <thead><tr><th>TGL</th><th>PELAPOR</th><th>AKSI</th></tr></thead>
-                <tbody><tr><td>18/12</td><td>Tami</td><td><button style="border:none; background:var(--primary); color:white; border-radius:5px; padding:5px 10px;">Detail</button></td></tr></tbody>
-            </table>
+            <h4 style="margin:0 0 10px 0;"><i class="fas fa-history"></i> Log Aktivitas Login</h4>
+            <div id="log-list" style="font-size:11px; max-height:100px; overflow-y:auto;">Memuat log...</div>
+        </div>
+
+        <div class="card">
+            <h4><i class="fas fa-tasks"></i> Workflow Tahapan Laporan</h4>
+            <div id="report-list">Memuat laporan...</div>
         </div>
     </div>
+    <script>
+        const label = localStorage.getItem("user_label");
+        if(localStorage.getItem("role")!=="admin") window.location.href="login.html";
+
+        function updateWorkflow(id, nextStatus) {
+            if(confirm("Ubah status laporan ke " + nextStatus + "?")){
+                alert("Status diperbarui menjadi " + nextStatus);
+                // Logika fetch update ke Google Sheets
+            }
+        }
+
+        // Dummy Data Workflow
+        const reports = [
+            { id: 1, tgl: '18/12', user: 'LURAH RIMBAS', status: 'Masuk' },
+            { id: 2, tgl: '18/12', user: 'BABINSA BINTAN', status: 'Verifikasi' }
+        ];
+
+        let html = "";
+        reports.forEach(r => {
+            html += `<div style="border-bottom:1px solid #eee; padding:10px 0;">
+                <small>${r.tgl} - <b>${r.user}</b></small><br>
+                <span class="badge b-${r.status.toLowerCase()}">${r.status}</span>
+                <div style="margin-top:5px;">
+                    <button class="btn-sm" style="background:#0288d1" onclick="updateWorkflow(${r.id}, 'Verifikasi')">Verif</button>
+                    <button class="btn-sm" style="background:#ff9800" onclick="updateWorkflow(${r.id}, 'Penanganan')">Tangani</button>
+                    <button class="btn-sm" style="background:#388e3c" onclick="updateWorkflow(${r.id}, 'Selesai')">Selesai</button>
+                </div>
+            </div>`;
+        });
+        document.getElementById('report-list').innerHTML = html;
+    </script>
 </body>
 </html>

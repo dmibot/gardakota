@@ -4,23 +4,45 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Login Admin</title>
+    <title>Login Garda Kota</title>
 </head>
-<body style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); height:100vh; display:flex; align-items:center;">
+<body style="background:linear-gradient(135deg, #2e7d32, #1b5e20); height:100vh; display:flex; align-items:center;">
     <div class="container" style="text-align:center;">
         <div class="card">
-            <img src="../../assets/img/garda-dumaikota.png" style="width:80px; margin-bottom:15px;">
-            <h3 style="margin:0;">ADMIN ACCESS</h3>
-            <p style="font-size:12px; color:#777;">Sistem Monitoring Garda Dumai Kota</p>
-            <input type="password" id="p" placeholder="Password Admin">
-            <button class="btn-main" onclick="l()">LOG IN <i class="fas fa-sign-in-alt"></i></button>
-            <a href="../../index.html" style="display:block; margin-top:20px; font-size:12px; color:#888;">Kembali ke Beranda</a>
+            <img src="../../assets/img/garda-dumaikota.png" style="width:80px; margin-bottom:10px;">
+            <h3 style="margin-bottom:20px">SISTEM LOGIN GARDA</h3>
+            <input type="text" id="user" placeholder="Username">
+            <input type="password" id="pass" placeholder="Password">
+            <button class="btn-main" onclick="auth()">MASUK</button>
         </div>
     </div>
     <script>
-        function l(){
-            if(document.getElementById('p').value === "dumaiidaman2025"){
-                localStorage.setItem("adm_garda", "true"); window.location.href="index.html";
+        const SCRIPT_URL = "URL_APPS_SCRIPT_BAPAK";
+        const admins = ["camat", "sekcam", "trantib", "kapolsek", "danramil", "binmas", "ramil01"];
+        const kel = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
+        const roles = ["lurah", "babinsa", "bhabin", "trantibkel", "pamong"];
+
+        async function auth() {
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+
+            let role = "", label = "";
+            if (admins.includes(u) && p === "dksiaga") {
+                role = "admin"; label = u.toUpperCase();
+            } else {
+                kel.forEach(k => roles.forEach(r => {
+                    if (u === `${r}-${k}` && p === "pantaudk") {
+                        role = "operator"; label = u.toUpperCase().replace('-', ' ');
+                    }
+                }));
+            }
+
+            if (role) {
+                localStorage.setItem("role", role);
+                localStorage.setItem("user_label", label);
+                // Log Aktivitas ke Google Sheets
+                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'log', user: label }) });
+                window.location.href = role === "admin" ? "index.html" : "../operator/index.html";
             } else alert("Akses Ditolak!");
         }
     </script>

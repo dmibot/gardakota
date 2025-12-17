@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Operator Lapor</title>
+</head>
+<body>
+    <div class="app-header">
+        <div style="font-weight:bold;">OPERATOR LAPOR</div>
+        <i class="fas fa-power-off" onclick="localStorage.clear(); window.location.href='../admin/login.html'"></i>
+    </div>
+    <div class="container">
+        <div class="card" style="background:#e8f5e9;">
+            <small>Petugas Pelapor:</small>
+            <h4 id="user-name" style="margin:0;">-</h4>
+        </div>
+        <div class="card">
+            <select id="kat"><option>Drainase/Banjir</option><option>Sampah</option><option>Kamtibmas</option></select>
+            <textarea id="ket" placeholder="Keterangan kejadian..."></textarea>
+            <button class="btn-main" style="background:#0288d1; margin-bottom:10px;" onclick="getGPS()">📍 KUNCI LOKASI</button>
+            <input type="file" id="foto" accept="image/*" capture="camera">
+            <button class="btn-main" id="btnKirim" style="margin-top:10px;" onclick="kirim()">🚀 KIRIM LAPORAN</button>
+        </div>
+    </div>
+    <script>
+        const label = localStorage.getItem("user_label");
+        if(!label) window.location.href="../admin/login.html";
+        document.getElementById('user-name').innerText = label;
+
+        let lat="", lng="";
+        function getGPS(){
+            navigator.geolocation.getCurrentPosition(p => {
+                lat = p.coords.latitude; lng = p.coords.longitude;
+                alert("Lokasi Terkunci!");
+            });
+        }
+        function kirim(){ alert("Mengirim Laporan..."); }
+    </script>
+</body>
+</html>
