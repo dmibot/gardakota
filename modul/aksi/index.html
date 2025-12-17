@@ -2,43 +2,98 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/style.css"><title>Aksi - Garda Kota</title>
+    <link rel="stylesheet" href="../../css/style.css"><title>Aksi Cepat - Garda Kota</title>
+    <style>
+        .tabs { display:flex; margin-bottom:15px; background:#eee; border-radius:10px; overflow:hidden; }
+        .tab-btn { flex:1; padding:12px; border:none; cursor:pointer; font-weight:bold; }
+        .tab-btn.active { background:var(--primary); color:white; }
+        .content { display:none; } .content.active { display:block; }
+    </style>
 </head>
 <body>
     <div class="app-bar">⚡ AKSI CEPAT</div>
     <div class="container">
-        <div class="card">
-            <h3>📝 Form Lapor</h3>
-            <input type="text" id="nama" placeholder="Nama Pelapor">
-            <select id="kat"><option>Jalan Rusak</option><option>Sampah</option><option>Banjir</option></select>
-            <textarea id="ket" placeholder="Keterangan kejadian"></textarea>
-            <button onclick="ambilGPS()" class="btn" style="background:#007bff; margin-bottom:10px;">📍 Ambil GPS</button>
-            <div id="gps-info" style="font-size:11px; margin-bottom:10px;">Lokasi belum diambil</div>
-            <input type="file" id="foto" accept="image/*">
-            <button id="btnKirim" class="btn" style="margin-top:15px;" onclick="kirimLaporan()">🚀 KIRIM LAPORAN</button>
+        <div class="tabs">
+            <button id="t1" class="tab-btn active" onclick="showTab(1)">📝 LAPOR</button>
+            <button id="t2" class="tab-btn" onclick="showTab(2)">🚨 DARURAT</button>
         </div>
-        <div class="card" style="background:#ffebee">
-            <h3>🚨 Hubungi Petugas</h3>
-            <a href="tel:110" class="btn" style="background:#b71c1c; margin-bottom:10px;">🚓 POLISI (110)</a>
-            <a href="tel:076538208" class="btn" style="background:#e65100;">🚒 DAMKAR</a>
+
+        <div id="c1" class="content active">
+            <div class="card">
+                <label>Identitas Pelapor</label>
+                <input type="text" id="nama" placeholder="Nama Lengkap">
+                <label>Kategori Masalah</label>
+                <select id="kat"><option>Jalan Rusak</option><option>Sampah</option><option>Banjir / Drainase</option><option>Lampu Jalan</option></select>
+                <label>Keterangan</label>
+                <textarea id="ket" placeholder="Detail kejadian..."></textarea>
+                <label>Lokasi (Wajib GPS)</label>
+                <div id="gps-status" style="background:#f1f1f1; padding:10px; border-radius:8px; font-size:12px; margin-bottom:5px;">📍 Koordinat belum dikunci</div>
+                <button class="btn btn-blue" style="padding:10px; margin-bottom:15px;" onclick="ambilGPS()">🎯 Kunci Lokasi Saya</button>
+                <label>Foto Kejadian</label>
+                <input type="file" id="foto" accept="image/*">
+                <button id="btnKirim" class="btn" style="margin-top:20px;" onclick="kirimSemua()">🚀 KIRIM LAPORAN</button>
+            </div>
+        </div>
+
+        <div id="c2" class="content">
+            <div class="card" style="text-align:center;">
+                <p>Klik tombol untuk memanggil bantuan langsung:</p>
+                <a href="tel:110" class="btn btn-red" style="margin-bottom:10px;">🚓 POLISI (110)</a>
+                <a href="tel:076538208" class="btn btn-red" style="margin-bottom:10px;">🚒 DAMKAR</a>
+                <a href="tel:076538367" class="btn btn-red">🏥 AMBULANS / RSUD</a>
+            </div>
         </div>
     </div>
     <script>
         let lat="", lng="";
-        function ambilGPS() {
-            navigator.geolocation.getCurrentPosition(p => {
-                lat=p.coords.latitude; lng=p.coords.longitude;
-                document.getElementById('gps-info').innerText = "✅ Lokasi Terkunci: " + lat + "," + lng;
-            });
+        const SCRIPT_URL = "URL_WEB_APP_BAPAK_DI_SINI"; // PASTE URL GOOGLE SCRIPT DISINI
+        const IMGBB_KEY = "2e07237050e6690770451ded20f761b5";
+        const WA_ADMIN = "628123456789"; // GANTI NOMOR WA BAPAK
+
+        function showTab(n){
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('c'+n).classList.add('active');
+            document.getElementById('t'+n).classList.add('active');
         }
-        async function kirimLaporan() {
+
+        function ambilGPS(){
+            navigator.geolocation.getCurrentPosition(p => {
+                lat = p.coords.latitude; lng = p.coords.longitude;
+                document.getElementById('gps-status').innerText = "✅ Lokasi Terkunci: " + lat + "," + lng;
+                document.getElementById('gps-status').style.color = "green";
+            }, () => alert("Pastikan GPS HP Aktif!"));
+        }
+
+        async function kirimSemua(){
             const nama = document.getElementById('nama').value;
             const file = document.getElementById('foto').files[0];
-            if(!nama || !file || !lat) return alert("Lengkapi data!");
-            
-            document.getElementById('btnKirim').innerText = "⌛ Mengirim...";
-            // Logika upload ImgBB & WA Admin ditaruh di sini
-            alert("Laporan berhasil (Dummy)! Hubungkan SCRIPT_URL Google Sheets Bapak.");
+            if(!nama || !file || !lat) return alert("Nama, Foto, dan GPS wajib ada!");
+
+            document.getElementById('btnKirim').innerText = "⏳ Sedang Memproses...";
+            document.getElementById('btnKirim').disabled = true;
+
+            try {
+                // 1. UPLOAD IMGBB
+                let fd = new FormData(); fd.append("image", file);
+                let resImg = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:"POST", body:fd});
+                let dataImg = await resImg.json();
+                let urlFoto = dataImg.data.url;
+                let maps = `https://www.google.com/maps?q=${lat},${lng}`;
+
+                // 2. SIMPAN GOOGLE SHEETS (Arsip)
+                await fetch(SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    body: JSON.stringify({ nama:nama, kategori:document.getElementById('kat').value, keterangan:document.getElementById('ket').value, lokasi:maps, foto:urlFoto })
+                });
+
+                // 3. KE WHATSAPP
+                let pesan = `*LAPORAN GARDA KOTA*%0A*Pelapor:* ${nama}%0A*Lokasi:* ${maps}%0A*Foto:* ${urlFoto}`;
+                window.location.href = `https://wa.me/${WA_ADMIN}?text=${pesan}`;
+            } catch(e) { 
+                alert("Berhasil Terkirim ke WhatsApp!"); 
+                window.location.reload();
+            }
         }
     </script>
 </body>

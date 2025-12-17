@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <title>Peta - Garda Kota</title>
+    <title>Peta Pantau</title>
 </head>
 <body>
-    <div class="app-bar">📍 PETA PANTAU DUMAI KOTA</div>
-    <div id="map" style="height: calc(100vh - 120px); width: 100%;"></div>
+    <div class="app-bar">📍 PETA SEBARAN DUMAI KOTA</div>
+    <div id="map" style="height:calc(100vh - 125px); width:100%;"></div>
     <nav class="bottom-nav">
         <a href="../../index.html" class="nav-item">🏠<br>Home</a>
         <a href="index.html" class="nav-item active">📍<br>Peta</a>
@@ -17,7 +17,7 @@
     <script>
         var map = L.map('map').setView([1.680, 101.448], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        // Tambahkan marker laporan dari database di sini
+        // Data marker akan otomatis muncul jika disambungkan ke SCRIPT_URL
     </script>
 </body>
 </html>

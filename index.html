@@ -8,13 +8,19 @@
     <div class="app-bar">🛡️ GARDA DUMAI KOTA</div>
     <div class="container">
         <div class="card" style="background: linear-gradient(135deg, #1e3c72, #2a5298); color:white;">
-            <small>Cuaca Dumai Kota</small><h3 id="txt-cuaca">29°C - Berawan</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><small>Info Cuaca Dumai</small><h3 id="txt-cuaca" style="margin:5px 0">Memuat cuaca...</h3></div>
+                <div style="font-size:35px">🌤️</div>
+            </div>
         </div>
-        <div style="display:flex; gap:10px;">
-            <div class="card" style="flex:1; text-align:center;"><h2 style="color:#f39c12; margin:0" id="st-proses">0</h2><small>PROSES</small></div>
-            <div class="card" style="flex:1; text-align:center;"><h2 style="color:#2ecc71; margin:0" id="st-selesai">0</h2><small>SELESAI</small></div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div class="card" style="flex:1; text-align:center; margin-bottom:0;"><h2 id="st-proses" style="color:#f39c12; margin:0">0</h2><small>PROSES</small></div>
+            <div class="card" style="flex:1; text-align:center; margin-bottom:0;"><h2 id="st-selesai" style="color:#2ecc71; margin:0">0</h2><small>SELESAI</small></div>
         </div>
-        <a href="modul/aksi/index.html" class="btn">📝 LAPOR SEKARANG</a>
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div id="map-dash" style="height:180px; width:100%;"></div>
+        </div>
+        <a href="modul/aksi/index.html" class="btn">📝 LAPOR / DARURAT</a>
     </div>
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active">🏠<br>Home</a>
@@ -22,6 +28,14 @@
         <a href="modul/aksi/index.html" class="nav-item">⚡<br>Aksi</a>
         <a href="modul/admin/login.html" class="nav-item">👤<br>Admin</a>
     </nav>
-    <script> if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js'); </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Inisialisasi Peta
+        var map = L.map('map-dash', {zoomControl: false}).setView([1.680, 101.448], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+        // Fetch Cuaca & Stats (Jika SCRIPT_URL sudah diisi nanti)
+    </script>
 </body>
 </html>

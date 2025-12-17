@@ -6,18 +6,18 @@
 </head>
 <body style="background:var(--primary); display:flex; align-items:center; height:100vh;">
     <div class="container">
-        <div class="card" style="text-align:center;">
-            <h3>🔑 LOGIN ADMIN</h3>
-            <input type="text" id="user" placeholder="Username">
-            <input type="password" id="pass" placeholder="Password">
-            <button onclick="login()" class="btn">MASUK</button>
+        <div class="card" style="text-align:center; padding:30px;">
+            <img src="../../assets/img/garda-dumaikota.png" style="width:100px; margin-bottom:15px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/608/608153.png'">
+            <h3>LOGIN ADMIN</h3>
+            <input type="password" id="p" placeholder="Password Idaman">
+            <button class="btn" onclick="l()">MASUK</button>
         </div>
     </div>
     <script>
-        function login() {
-            if(document.getElementById('user').value === "camat_dumkot" && document.getElementById('pass').value === "dumaiidaman2025") {
-                localStorage.setItem("admin", "true"); window.location.href="index.html";
-            } else alert("Salah!");
+        function l(){
+            if(document.getElementById('p').value === "dumaiidaman2025"){
+                localStorage.setItem("garda_admin", "true"); window.location.href="index.html";
+            } else alert("Password Salah!");
         }
     </script>
 </body>

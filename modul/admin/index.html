@@ -2,22 +2,39 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/style.css"><title>Admin Panel</title>
+    <link rel="stylesheet" href="../../css/style.css"><title>Panel Admin</title>
 </head>
 <body>
-    <div class="app-bar">📊 DASHBOARD ADMIN</div>
+    <div class="app-bar">📊 PANEL KONTROL CAMAT</div>
     <div class="container">
-        <button onclick="window.print()" class="btn" style="background:#455a64; margin-bottom:15px;">🖨️ CETAK LAPORAN MINGGUAN</button>
+        <button class="btn btn-blue" onclick="cetak()" style="margin-bottom:15px;">🖨️ CETAK LAPORAN MINGGUAN</button>
         <div class="card" style="overflow-x:auto;">
-            <table style="width:100%; font-size:12px; border-collapse:collapse;">
-                <thead><tr style="background:#eee;"><th>Tgl</th><th>Masalah</th><th>Status</th></tr></thead>
-                <tbody id="data-table"><tr><td colspan="3" align="center">Memuat data...</td></tr></tbody>
-            </table>
+            <h3>Daftar Laporan Masuk</h3>
+            <table id="tabel"><thead><tr><th>Tgl</th><th>Nama</th><th>Masalah</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody></table>
         </div>
     </div>
     <script>
-        if(localStorage.getItem("admin") !== "true") window.location.href="login.html";
-        // Fungsi fetch data dari Google Sheets ditaruh di sini
+        if(localStorage.getItem("garda_admin") !== "true") window.location.href="login.html";
+        const SCRIPT_URL = "URL_WEB_APP_BAPAK_DI_SINI"; 
+
+        async function load(){
+            const r = await fetch(SCRIPT_URL);
+            const data = await r.json();
+            const tb = document.querySelector("#tabel tbody");
+            tb.innerHTML = "";
+            data.reverse().forEach(i => {
+                let row = `<tr>
+                    <td>${new Date(i.timestamp).toLocaleDateString()}</td>
+                    <td>${i.nama}</td>
+                    <td>${i.kategori}</td>
+                    <td style="color:${i.status==='Selesai'?'green':'orange'}">${i.status}</td>
+                    <td><button onclick="update('${i.timestamp}')">✅</button></td>
+                </tr>`;
+                tb.innerHTML += row;
+            });
+        }
+        function cetak(){ window.print(); }
+        load();
     </script>
 </body>
 </html>
