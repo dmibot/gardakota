@@ -7,14 +7,15 @@
     <title>Command Center</title>
 </head>
 <body>
+    <div id="ping-alert" class="notify-alert"></div>
     <div class="app-header">
         <div style="font-weight:bold;"><i class="fas fa-tower-broadcast"></i> COMMAND CENTER</div>
         <i class="fas fa-power-off" onclick="localStorage.clear(); location.href='login.html'"></i>
     </div>
     <div class="container">
         <div class="card">
-            <h4><i class="fas fa-fingerprint"></i> Log Login Petugas</h4>
-            <div id="log-list" style="font-size:11px; color:#666;">Memuat log...</div>
+            <h4><i class="fas fa-fingerprint"></i> Log Login & Intelligence</h4>
+            <div id="log-list" style="font-size:11px; color:#666; max-height:100px; overflow-y:auto;">Memuat data...</div>
         </div>
         <div id="wf-list">Memuat laporan...</div>
     </div>
