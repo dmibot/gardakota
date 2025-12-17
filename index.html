@@ -2,71 +2,58 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garda Dumai Kota</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Garda Dumai Kota</title><link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="ticker"><p>⚠️ INFO: Waspada cuaca ekstrem di pesisir Dumai Kota. Petugas GARDA siaga di Kelurahan Laksamana dan Rimba Sekampung.</p></div>
-    
     <div class="app-header">
         <img src="assets/img/garda-dumaikota.png" alt="Logo">
         <div style="text-align:center;">
-            <div style="font-size:10px; opacity:0.8;">KECAMATAN DUMAI KOTA</div>
-            <div style="font-size:16px; font-weight:bold;">GARDA KOTA IDAMAN</div>
+            <div style="font-size:10px; opacity:0.8; letter-spacing:1px;">PEMERINTAH KOTA DUMAI</div>
+            <div style="font-size:16px; font-weight:bold;">GARDA DUMAI KOTA</div>
         </div>
-        <i class="fas fa-bell-slash" id="notif-btn" onclick="alert('Notifikasi Aktif')"></i>
+        <i class="fas fa-bell"></i>
     </div>
-
     <div class="container">
-        <div class="card" style="border-left: 5px solid #d32f2f;">
-            <h4 style="margin:0 0 10px 0; color:#d32f2f;"><i class="fas fa-house-crack"></i> Info Gempa Terkini (BMKG)</h4>
-            <div id="gempa-info" style="font-size:13px; font-weight:600;">Sedang memuat data BMKG...</div>
+        <div class="card" style="background: #fff5f5; border-left: 5px solid #d32f2f;">
+            <h4 style="margin:0 0 5px 0; color:#d32f2f;"><i class="fas fa-house-crack"></i> Gempa Terkini (BMKG)</h4>
+            <div id="gempa-info" style="font-size:13px; font-weight:600;">Menghubungkan ke BMKG...</div>
         </div>
-
-        <div class="card" style="background: linear-gradient(135deg, #0288d1, #01579b); color:white;">
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div class="card" style="flex:1; text-align:center; margin-bottom:0;"><h2 id="st-proses" style="color:#f39c12; margin:0">0</h2><small>DALAM PROSES</small></div>
+            <div class="card" style="flex:1; text-align:center; margin-bottom:0;"><h2 id="st-selesai" style="color:#2ecc71; margin:0">0</h2><small>LAPORAN SELESAI</small></div>
+        </div>
+        <div class="card">
+            <h4 style="margin:0 0 10px 0;"><i class="fas fa-cloud-sun"></i> Cuaca Dumai Kota</h4>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div id="weather-desc">Cerah Berawan</div>
-                    <h2 style="margin:5px 0" id="weather-temp">30°C</h2>
-                    <small>Dumai, Riau</small>
-                </div>
-                <i class="fas fa-cloud-sun-rain" style="font-size:40px; opacity:0.5;"></i>
+                <div id="w-desc">Cerah Berawan</div>
+                <h3 id="w-temp" style="margin:0">30°C</h3>
             </div>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
-            <a href="modul/aksi/index.html" class="card" style="text-align:center; text-decoration:none; color:inherit;">
-                <i class="fas fa-file-signature" style="font-size:24px; color:var(--primary);"></i><br><small>Lapor Kejadian</small>
-            </a>
-            <a href="modul/peta/index.html" class="card" style="text-align:center; text-decoration:none; color:inherit;">
-                <i class="fas fa-map-location-dot" style="font-size:24px; color:var(--info);"></i><br><small>Peta Pantau</small>
-            </a>
-        </div>
-
-        <div class="card">
-            <h4 style="margin:0 0 10px 0;"><i class="fas fa-newspaper"></i> Berita Kebencanaan</h4>
-            <div style="font-size:13px;">Strategi Mitigasi Banjir Rob di Kecamatan Dumai Kota Tahun 2025...</div>
-        </div>
+        <a href="modul/aksi/index.html" class="btn-main"><i class="fas fa-plus-circle"></i> BUAT LAPORAN KEJADIAN</a>
     </div>
-
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
-        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map"></i>Peta</a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-bolt"></i>Aksi</a>
-        <a href="modul/admin/login.html" class="nav-item"><i class="fas fa-user-shield"></i>Admin</a>
+        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-marked-alt"></i>Peta</a>
+        <a href="modul/admin/login.html" class="nav-item"><i class="fas fa-user-shield"></i>Petugas</a>
     </nav>
-
     <script>
-        async function fetchBMKG() {
+        async function loadDashboard() {
             try {
-                const res = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
-                const data = await res.json();
-                const g = data.Infogempa.gempa;
-                document.getElementById('gempa-info').innerHTML = `Magnitude: ${g.Magnitude} | ${g.Wilayah} <br> <small style="color:#666">${g.Tanggal} - ${g.Jam}</small>`;
-            } catch (e) { document.getElementById('gempa-info').innerText = "Gagal memuat data BMKG"; }
+                const r = await fetch('https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec');
+                const d = await r.json();
+                const p = d.laporan.filter(i => i[6] !== 'Selesai' && i[6] !== 'Status').length;
+                const s = d.laporan.filter(i => i[6] === 'Selesai').length;
+                document.getElementById('st-proses').innerText = p;
+                document.getElementById('st-selesai').innerText = s;
+                
+                const gRes = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
+                const gData = await gRes.json();
+                const g = gData.Infogempa.gempa;
+                document.getElementById('gempa-info').innerHTML = `M ${g.Magnitude} | ${g.Wilayah} <br><small>${g.Tanggal} ${g.Jam}</small>`;
+            } catch (e) { console.log(e); }
         }
-        fetchBMKG();
+        loadDashboard();
     </script>
 </body>
 </html>

@@ -6,44 +6,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Login Garda Kota</title>
 </head>
-<body style="background:linear-gradient(135deg, #2e7d32, #1b5e20); height:100vh; display:flex; align-items:center;">
-    <div class="container" style="text-align:center;">
-        <div class="card">
-            <img src="../../assets/img/garda-dumaikota.png" style="width:80px; margin-bottom:10px;">
-            <h3 style="margin-bottom:20px">SISTEM LOGIN GARDA</h3>
+<body style="background:linear-gradient(135deg, #2e7d32, #1b5e20); height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div class="container">
+        <div class="card" style="text-align:center; padding:30px;">
+            <img src="../../assets/img/garda-dumaikota.png" style="width:100px; margin-bottom:15px;">
+            <h3 style="margin:0;">OTENTIKASI PETUGAS</h3>
+            <p style="font-size:12px; color:#888; margin-bottom:20px;">Masukkan Kode Akses Khusus</p>
             <input type="text" id="user" placeholder="Username">
             <input type="password" id="pass" placeholder="Password">
-            <button class="btn-main" onclick="auth()">MASUK</button>
+            <button class="btn-main" onclick="auth()">MASUK KE SISTEM</button>
+            <a href="../../index.html" style="display:block; margin-top:15px; font-size:12px; color:#aaa; text-decoration:none;">Kembali ke Beranda</a>
         </div>
     </div>
     <script>
-        const SCRIPT_URL = "URL_APPS_SCRIPT_BAPAK";
         const admins = ["camat", "sekcam", "trantib", "kapolsek", "danramil", "binmas", "ramil01"];
-        const kel = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
+        const kels = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
         const roles = ["lurah", "babinsa", "bhabin", "trantibkel", "pamong"];
 
-        async function auth() {
+        async function auth(){
             const u = document.getElementById('user').value.toLowerCase();
             const p = document.getElementById('pass').value;
-
             let role = "", label = "";
-            if (admins.includes(u) && p === "dksiaga") {
+
+            if(admins.includes(u) && p === "dksiaga"){
                 role = "admin"; label = u.toUpperCase();
             } else {
-                kel.forEach(k => roles.forEach(r => {
-                    if (u === `${r}-${k}` && p === "pantaudk") {
-                        role = "operator"; label = u.toUpperCase().replace('-', ' ');
+                kels.forEach(k => roles.forEach(r => {
+                    if(u === `${r}-${k}` && p === "pantaudk"){
+                        role = "operator"; label = u.toUpperCase().replace("-"," ");
                     }
                 }));
             }
 
-            if (role) {
-                localStorage.setItem("role", role);
-                localStorage.setItem("user_label", label);
-                // Log Aktivitas ke Google Sheets
-                fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'log', user: label }) });
+            if(role){
+                localStorage.setItem("role", role); localStorage.setItem("user_label", label);
+                // Log Login
+                fetch('https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec', { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'log', user:label }) });
                 window.location.href = role === "admin" ? "index.html" : "../operator/index.html";
-            } else alert("Akses Ditolak!");
+            } else alert("Username atau Password Salah!");
         }
     </script>
 </body>
