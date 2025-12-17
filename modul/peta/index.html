@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="peta.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Peta Pantau - Garda Kota</title>
+</head>
+<body>
+    <div class="app-header">
+        <a href="../../index.html" style="color:white;"><i class="fas fa-chevron-left"></i></a>
+        <div style="text-align:center;">
+            <div style="font-size:16px; font-weight:bold;">PETA SEBARAN KEJADIAN</div>
+            <div style="font-size:10px; opacity:0.8;">KECAMATAN DUMAI KOTA</div>
+        </div>
+        <i class="fas fa-refresh" onclick="location.reload()"></i>
+    </div>
+
+    <div id="map"></div>
+
+    <nav class="bottom-nav">
+        <a href="../../index.html" class="nav-item"><i class="fas fa-house-chimney"></i>Home</a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-map-location-dot"></i>Peta</a>
+        <a href="../aksi/index.html" class="nav-item"><i class="fas fa-bolt"></i>Lapor</a>
+    </nav>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="peta.js"></script>
+</body>
+</html>
