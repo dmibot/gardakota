@@ -3,24 +3,62 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="operator.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Operator Lapor - Garda Kota</title>
 </head>
 <body>
     <div class="app-header">
-        <div style="font-weight:bold;">OPERATOR PANEL</div>
-        <i class="fas fa-sign-out-alt" onclick="localStorage.clear(); location.href='../admin/login.html'"></i>
+        <div style="font-weight:bold;"><i class="fas fa-user-check"></i> OPERATOR PANEL</div>
+        <i class="fas fa-power-off" onclick="localStorage.clear(); location.href='../admin/login.html'"></i>
     </div>
+
     <div class="container">
-        <div class="card" style="background:#e8f5e9;">
-            <small>Petugas:</small><h4 id="op-name" style="margin:0;">-</h4>
+        <div class="op-card-header">
+            <small>Selamat Bertugas:</small>
+            <h3 id="display-name" style="margin:0;">-</h3>
         </div>
+
         <div class="card">
-            <select id="kat"><option>Banjir Rob</option><option>Sampah</option><option>Kamtibmas</option></select>
-            <textarea id="ket" placeholder="Detail kejadian..."></textarea>
-            <input type="file" id="foto" capture="camera">
-            <button class="btn-main" id="btnLapor" style="margin-top:15px;" onclick="kirim()">KIRIM LAPORAN</button>
+            <label>I. Titik Koordinat (GPS)</label>
+            <div id="gps-status" class="gps-status">📍 Sinyal GPS belum dikunci</div>
+            <button class="btn-main" style="background:#0288d1; margin-bottom:20px;" onclick="trackLokasi()">
+                <i class="fas fa-crosshairs"></i> KUNCI LOKASI KEJADIAN
+            </button>
+
+            <label>II. Jenis Kejadian</label>
+            <select id="kat">
+                <option value="Banjir Rob / Pasang Keling">🌊 Banjir Rob / Pasang Keling</option>
+                <option value="Drainase Tersumbat / Banjir">🕳️ Drainase Tersumbat / Banjir</option>
+                <option value="Penumpukan Sampah">🗑️ Penumpukan Sampah</option>
+                <option value="Kamtibmas / Tawuran">👮 Kamtibmas / Tawuran</option>
+                <option value="Kebakaran Lahan / Karhutla">🔥 Kebakaran Lahan / Karhutla</option>
+                <option value="Lampu Jalan Mati (PJU)">💡 Lampu Jalan Mati (PJU)</option>
+                <option value="Infrastruktur / Jalan Rusak">🛣️ Infrastruktur / Jalan Rusak</option>
+                <option value="Pohon Tumbang / Gangguan Kabel">🌳 Pohon Tumbang / Kabel</option>
+                <option value="Penertiban PKL / Perda">🏪 Penertiban PKL / Perda</option>
+                <option value="Layanan Publik / Administrasi">📄 Layanan Publik / Administrasi</option>
+                <option value="Lainnya">❓ Kejadian Lainnya</option>
+            </select>
+
+            <label>III. Detail Keterangan</label>
+            <textarea id="ket" rows="3" placeholder="Contoh: Terjadi di Jl. Kesehatan dekat Masjid..."></textarea>
+
+            <label>IV. Foto Bukti Lapangan</label>
+            <input type="file" id="foto" accept="image/*" capture="camera" style="margin-top:5px;">
+
+            <button class="btn-main" id="btnKirim" style="margin-top:25px;" onclick="kirimLaporan()">
+                <i class="fas fa-paper-plane"></i> KIRIM LAPORAN SEKARANG
+            </button>
         </div>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="../../index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="../peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
+        <a href="#" class="nav-item active"><i class="fas fa-plus-circle"></i>Lapor</a>
+    </nav>
+
     <script src="operator.js"></script>
 </body>
 </html>
