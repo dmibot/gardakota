@@ -8,11 +8,11 @@
     <title>Garda Dumai Kota</title>
 </head>
 <body>
-    <div class="marquee"><marquee scrollamount="5">⚠️ WASPADA PERINGATAN DINI RIAU: Potensi hujan lebat dan angin kencang di wilayah Dumai Kota.</marquee></div>
+    <div style="background:#ffeb3b; color:#b71c1c; padding:5px; font-size:12px; font-weight:bold;"><marquee>⚠️ SIAGA PASANG KELING: Potensi banjir rob di wilayah pesisir Dumai Kota.</marquee></div>
     <div class="app-header">
-        <img src="assets/img/garda-dumaikota.png" alt="Logo">
+        <img src="assets/img/garda-dumaikota.png" style="width:50px;">
         <div style="text-align:center;">
-            <div style="font-size:10px; opacity:0.8; letter-spacing:1px;">PEMERINTAH KOTA DUMAI</div>
+            <div style="font-size:10px; opacity:0.8;">PEMERINTAH KOTA DUMAI</div>
             <div style="font-size:18px; font-weight:bold;">GARDA DUMAI KOTA</div>
         </div>
         <i class="fas fa-bell"></i>
@@ -22,16 +22,16 @@
             <h4 style="margin:0; color:var(--accent);"><i class="fas fa-house-crack"></i> Info Gempa BMKG</h4>
             <div id="gempa" style="font-size:13px; font-weight:bold; margin-top:5px;">Memuat data...</div>
         </div>
-        <div style="display:flex; gap:12px; margin-bottom:15px;">
-            <div class="card" style="flex:1; text-align:center; margin:0;"><h2 id="st-proses" style="color:#f39c12; margin:0">0</h2><small>PROSES</small></div>
-            <div class="card" style="flex:1; text-align:center; margin:0;"><h2 id="st-selesai" style="color:#2ecc71; margin:0">0</h2><small>SELESAI</small></div>
+        <div style="display:flex; gap:12px;">
+            <div class="card" style="flex:1; text-align:center;"><h2 id="st-proses" style="color:#f39c12; margin:0">0</h2><small>PROSES</small></div>
+            <div class="card" style="flex:1; text-align:center;"><h2 id="st-selesai" style="color:#2ecc71; margin:0">0</h2><small>DONE</small></div>
         </div>
-        <a href="modul/aksi/index.html" class="btn-main"><i class="fas fa-bolt"></i> AKSI CEPAT & DARURAT</a>
+        <a href="modul/aksi/index.html" class="btn-main"><i class="fas fa-bolt"></i> AKSI CEPAT & SOS</a>
     </div>
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-house-chimney"></i>Home</a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
         <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-marked-alt"></i>Peta</a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i>Lapor</a>
+        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i>Aksi</a>
         <a href="modul/admin/login.html" class="nav-item"><i class="fas fa-user-shield"></i>Petugas</a>
     </nav>
     <script>
@@ -43,8 +43,7 @@
                 document.getElementById('st-selesai').innerText = d.laporan.filter(i => i[6] === 'Selesai').length;
                 const gRes = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
                 const gData = await gRes.json();
-                const g = gData.Infogempa.gempa;
-                document.getElementById('gempa').innerText = `M ${g.Magnitude} | ${g.Wilayah}`;
+                document.getElementById('gempa').innerText = `M ${gData.Infogempa.gempa.Magnitude} | ${gData.Infogempa.gempa.Wilayah}`;
             } catch(e) {}
         }
         fetchDash();

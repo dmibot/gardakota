@@ -1,4 +1,0 @@
-.panic-btn { background: radial-gradient(circle, #ff1744 0%, #b71c1c 100%); width: 120px; height: 120px; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; box-shadow: 0 0 20px rgba(255, 23, 68, 0.6); border: 5px solid rgba(255,255,255,0.3); animation: pulse 1.5s infinite; cursor: pointer; }
-@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-.emergency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn-red { background: #b71c1c; color: white; padding: 12px; border-radius: 12px; text-decoration: none; text-align: center; font-weight: bold; font-size: 13px; }
