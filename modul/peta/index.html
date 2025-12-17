@@ -1,5 +1,29 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>Peta</title></head><body>
-    <div class="app-header"><a href="../../index.html" style="color:white;"><i class="fas fa-home"></i></a><div>PETA SEBARAN</div><div></div></div>
-    <div id="map" style="height:calc(100vh - 135px);"></div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="peta.js"></script></body></html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Peta Pantau</title>
+</head>
+<body>
+    <div class="app-header">
+        <a href="../../index.html" style="color:white;"><i class="fas fa-home"></i></a>
+        <div style="font-weight:bold;">PETA SEBARAN KEJADIAN</div>
+        <i class="fas fa-sync" onclick="location.reload()"></i>
+    </div>
+    
+    <div id="map" style="height:calc(100vh - 135px); width:100%;"></div>
+
+    <nav class="bottom-nav">
+        <a href="../../index.html" class="nav-item"><i class="fas fa-house"></i>Home</a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-map-location-dot"></i>Peta</a>
+        <a href="../aksi/index.html" class="nav-item"><i class="fas fa-bolt"></i>Darurat</a>
+        <a href="../admin/login.html" class="nav-item"><i class="fas fa-user-shield"></i>Petugas</a>
+    </nav>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="peta.js"></script>
+</body>
+</html>
