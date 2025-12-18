@@ -2,129 +2,133 @@
 
 # CONFIG DATA
 URL_SAKTI="https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec"
-IMGBB_KEY="2e07237050e6690770451ded20f761b5"
 
-echo "🔧 Update Operator: Triple-Fetch (Fix Baris 3 Level 12)..."
+echo "🚀 Memulihkan Modul Admin & Peta..."
 
-cat << EOF > modul/operator/operator.js
-const SAKTI = "$URL_SAKTI";
-const IMGBB = "$IMGBB_KEY";
-const label = localStorage.getItem("user_label");
+# 1. Pastikan Folder Tersedia
+mkdir -p modul/admin
+mkdir -p modul/peta
 
-if(!label) window.location.href="../admin/login.html";
-document.getElementById('op-name').innerText = label;
-
-let lat = "", lng = "";
-let infoJalan = "";
-let infoKel = "";
-let infoKec = "";
-
-async function ambilLokasi() {
-    const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Sinkronisasi 3 Layer Wilayah...";
-    box.style.background = "#fff3e0";
-
-    navigator.geolocation.getCurrentPosition(async (p) => {
-        lat = p.coords.latitude; 
-        lng = p.coords.longitude;
-        
-        try {
-            // REQUEST 1: ZOOM 18 (BARIS 1 - JALAN)
-            const res1 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=18&accept-language=id-ID&format=jsonv2\`);
-            const d1 = await res1.json();
-            
-            // REQUEST 2: ZOOM 14 (BARIS 2 - KELURAHAN)
-            const res2 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=14&accept-language=id-ID&format=jsonv2\`);
-            const d2 = await res2.json();
-
-            // REQUEST 3: ZOOM 12 (BARIS 3 - KECAMATAN FIX)
-            const res3 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=12&accept-language=id-ID&format=jsonv2\`);
-            const d3 = await res3.json();
-            
-            // --- PARSING DATA ---
-
-            // 1. BARIS 1 (Logika Bapak yang sudah berhasil)
-            let adj = d1.address;
-            let nmJalan = adj.road || adj.pedestrian || adj.path || "";
-            infoJalan = nmJalan ? \`Jln. \${nmJalan}\` : "(Jalan tdk terdeteksi)";
-
-            // 2. BARIS 2 (Logika Bapak yang sudah berhasil)
-            let adk = d2.address;
-            let nmKel = adk.village || adk.suburb || adk.neighbourhood || adk.quarter || d2.name || "";
-            if (!nmKel || nmKel == "Dumai") {
-                 nmKel = adj.village || adj.suburb || adj.neighbourhood || "Wilayah tdk terdeteksi";
+# 2. Buat LOGIN ADMIN (modul/admin/login.html)
+cat << EOF > modul/admin/login.html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Login - GARDA DUMAI KOTA</title>
+</head>
+<body style="background:#1a1a1a; height:100vh; display:flex; justify-content:center; align-items:center; font-family:sans-serif;">
+    <div style="background:#fff; padding:30px; border-radius:12px; width:300px; text-align:center;">
+        <i class="fas fa-shield-alt" style="font-size:40px; color:#e74c3c;"></i>
+        <h2 style="margin:15px 0;">COMMAND CENTER</h2>
+        <input type="text" id="user" placeholder="Username" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">
+        <input type="password" id="pass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">
+        <button onclick="auth()" style="width:100%; padding:12px; background:#e74c3c; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">MASUK</button>
+    </div>
+    <script>
+        function auth() {
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+            const admins = ["camat", "sekcam", "trantib", "kapolsek", "danramil"];
+            const kels = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
+            const roles = ["lurah", "babinsa", "bhabin", "pamong", "trantib"];
+            let role = "", label = "";
+            if(admins.includes(u) && p === "dksiaga") { role="admin"; label=u.toUpperCase(); }
+            else {
+                kels.forEach(k => roles.forEach(r => {
+                    if(u === \`\${r}-\${k}\` && p === "pantaudk") { role="operator"; label=u.toUpperCase().replace("-"," "); }
+                }));
             }
-            infoKel = \`Kel. \${nmKel}\`;
-
-            // 3. BARIS 3 (LOGIKA BARU - FIX LEVEL 12)
-            // Di Level 12 Nominatim akan mengembalikan City District atau District secara luas
-            let adz = d3.address;
-            let nmKec = adz.city_district || adz.district || adz.city || "Dumai";
-            infoKec = \`Kec. \${nmKec}\`;
-
-            // TAMPILAN UI
-            let tampilanHTML = \`
-                ✅ TERKUNCI<br>
-                <div style="text-align:left; margin-top:8px; padding-left:12px; border-left:4px solid #2e7d32;">
-                    <div style="font-size:12px; color:#555; margin-bottom:2px;">\${infoJalan}</div>
-                    <div style="font-size:16px; font-weight:800; color:#000; text-transform:uppercase; margin-bottom:2px;">\${infoKel}</div>
-                    <div style="font-size:13px; color:#333;">\${infoKec}</div>
-                </div>
-                <small style="color:#aaa; font-size:10px; display:block; margin-top:5px;">\${lat}, \${lng}</small>
-            \`;
-            
-            box.innerHTML = tampilanHTML;
-            box.style.background = "#e8f5e9";
-            box.style.color = "#2e7d32";
-            box.style.border = "1px solid #c8e6c9";
-            
-        } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Koneksi Lambat (Ulangi Klik).</small>";
+            if(role) {
+                localStorage.setItem("role", role); localStorage.setItem("user_label", label);
+                window.location.href = role === "admin" ? "index.html" : "../operator/index.html";
+            } else alert("Akses Ditolak!");
         }
-    }, (err) => {
-        alert("GPS ERROR: Wajib izinkan lokasi!");
-        box.innerText = "❌ GPS Mati";
-    }, { enableHighAccuracy: true });
-}
-
-async function kirimLaporan() {
-    const file = document.getElementById('foto').files[0];
-    const kat = document.getElementById('kat').value;
-    const ket = document.getElementById('ket').value;
-    const btn = document.getElementById('btnLapor');
-
-    if(!lat || !file) return alert("Wajib Kunci GPS & Ambil Foto!");
-    btn.innerText = "⏳ MENGIRIM...";
-    btn.disabled = true;
-
-    try {
-        let fd = new FormData(); fd.append("image", file);
-        let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
-        let dataImg = await resImg.json();
-        const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
-
-        const wilayahFull = \`[\${infoKel}, \${infoKec} | \${infoJalan}]\`;
-
-        await fetch(SAKTI, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({
-                nama: label,
-                kategori: kat,
-                keterangan: \`\${wilayahFull} \${ket}\`,
-                lokasi: mapsUrl,
-                foto: dataImg.data.url
-            })
-        });
-
-        alert("Laporan Terkirim!");
-        window.location.reload();
-    } catch(e) {
-        alert("Gagal Kirim!");
-        btn.innerText = "KIRIM KE DASHBOARD";
-        btn.disabled = false;
-    }
-}
+    </script>
+</body>
+</html>
 EOF
 
-echo "✅ Selesai. Triple-Fetch Aktif: Baris 1(18), Baris 2(14), Baris 3(12)."
+# 3. Buat INDEX ADMIN / COMMAND CENTER (modul/admin/index.html)
+cat << EOF > modul/admin/index.html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Garda Dumai Kota Command Center</title>
+</head>
+<body style="background:#f4f7f6; font-family:sans-serif; margin:0;">
+    <div style="background:#1a1a1a; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <h1 style="font-size:18px; margin:0;">Admin TRC | Halo, <span id="admin-nick"></span></h1>
+        <button onclick="localStorage.clear(); location.href='login.html';" style="background:#c0392b; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Keluar</button>
+    </div>
+    <div style="padding:20px; max-width:1200px; margin:auto;">
+        <h2 style="border-bottom:3px solid #1a1a1a; padding-bottom:10px;">GARDA DUMAI KOTA COMMAND CENTER <span id="total-lap" style="float:right; background:#e74c3c; color:white; padding:2px 10px; border-radius:10px;">0</span></h2>
+        <div style="background:white; border-radius:10px; overflow-x:auto; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+            <table style="width:100%; border-collapse:collapse; min-width:900px;">
+                <thead><tr style="background:#2c3e50; color:white; text-align:left;"><th style="padding:15px;">Waktu</th><th style="padding:15px;">Jenis</th><th style="padding:15px;">Lokasi / Wilayah</th><th style="padding:15px;">Status</th><th style="padding:15px;">Aksi</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const SAKTI = "$URL_SAKTI";
+        document.getElementById('admin-nick').innerText = localStorage.getItem('user_label');
+        async function loadLaporan() {
+            const tbody = document.getElementById('table-body');
+            try {
+                const res = await fetch(SAKTI);
+                const data = await res.json();
+                const laporans = data.laporan;
+                document.getElementById('total-lap').innerText = laporans.length;
+                tbody.innerHTML = '';
+                laporans.reverse().forEach((item, index) => {
+                    const st = item[6] || 'Menunggu';
+                    const stColor = st === 'Selesai' ? 'background:#d4edda;color:#155724' : (st === 'Proses' ? 'background:#fff3cd;color:#856404' : 'background:#ffdada;color:#c0392b');
+                    tbody.innerHTML += \`<tr><td style="padding:15px; border-bottom:1px solid #eee;">\${item[0]}</td><td style="padding:15px; border-bottom:1px solid #eee;"><b>\${item[2]}</b><br><small>\${item[1]}</small></td><td style="padding:15px; border-bottom:1px solid #eee; color:#2e7d32; font-weight:bold;">\${item[4]}</td><td style="padding:15px; border-bottom:1px solid #eee;"><span style="padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; \${stColor}">\${st}</span></td><td style="padding:15px; border-bottom:1px solid #eee;"><button onclick="window.open('\${item[3]}','_blank')" style="background:#3498db; color:white; border:none; padding:8px; border-radius:5px;"><i class="fas fa-map"></i></button></td></tr>\`;
+                });
+            } catch (e) { tbody.innerHTML = "Gagal muat data."; }
+        }
+        window.onload = loadLaporan;
+    </script>
+</body>
+</html>
+EOF
+
+# 4. Buat PETA (modul/peta/index.html)
+cat << EOF > modul/peta/index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Peta Sebaran Laporan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>#map { height: 100vh; width: 100%; }</style>
+</head>
+<body style="margin:0;">
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([1.68, 101.44], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        async function loadMarkers() {
+            try {
+                const res = await fetch("$URL_SAKTI");
+                const data = await res.json();
+                data.laporan.forEach(item => {
+                    const loc = item[3].match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
+                    if(loc) L.marker([loc[1], loc[2]]).addTo(map).bindPopup("<b>" + item[2] + "</b><br>" + item[4]);
+                });
+            } catch(e) { console.log("Gagal muat peta"); }
+        }
+        loadMarkers();
+    </script>
+</body>
+</html>
+EOF
+
+echo "✅ Selesai! Folder ./modul/admin/ dan ./modul/peta/ sudah terisi kembali."

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Garda Dumai Kota Command Center</title>
+</head>
+<body style="background:#f4f7f6; font-family:sans-serif; margin:0;">
+    <div style="background:#1a1a1a; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <h1 style="font-size:18px; margin:0;">Admin TRC | Halo, <span id="admin-nick"></span></h1>
+        <button onclick="localStorage.clear(); location.href='login.html';" style="background:#c0392b; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Keluar</button>
+    </div>
+    <div style="padding:20px; max-width:1200px; margin:auto;">
+        <h2 style="border-bottom:3px solid #1a1a1a; padding-bottom:10px;">GARDA DUMAI KOTA COMMAND CENTER <span id="total-lap" style="float:right; background:#e74c3c; color:white; padding:2px 10px; border-radius:10px;">0</span></h2>
+        <div style="background:white; border-radius:10px; overflow-x:auto; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+            <table style="width:100%; border-collapse:collapse; min-width:900px;">
+                <thead><tr style="background:#2c3e50; color:white; text-align:left;"><th style="padding:15px;">Waktu</th><th style="padding:15px;">Jenis</th><th style="padding:15px;">Lokasi / Wilayah</th><th style="padding:15px;">Status</th><th style="padding:15px;">Aksi</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
+        document.getElementById('admin-nick').innerText = localStorage.getItem('user_label');
+        async function loadLaporan() {
+            const tbody = document.getElementById('table-body');
+            try {
+                const res = await fetch(SAKTI);
+                const data = await res.json();
+                const laporans = data.laporan;
+                document.getElementById('total-lap').innerText = laporans.length;
+                tbody.innerHTML = '';
+                laporans.reverse().forEach((item, index) => {
+                    const st = item[6] || 'Menunggu';
+                    const stColor = st === 'Selesai' ? 'background:#d4edda;color:#155724' : (st === 'Proses' ? 'background:#fff3cd;color:#856404' : 'background:#ffdada;color:#c0392b');
+                    tbody.innerHTML += `<tr><td style="padding:15px; border-bottom:1px solid #eee;">${item[0]}</td><td style="padding:15px; border-bottom:1px solid #eee;"><b>${item[2]}</b><br><small>${item[1]}</small></td><td style="padding:15px; border-bottom:1px solid #eee; color:#2e7d32; font-weight:bold;">${item[4]}</td><td style="padding:15px; border-bottom:1px solid #eee;"><span style="padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; ${stColor}">${st}</span></td><td style="padding:15px; border-bottom:1px solid #eee;"><button onclick="window.open('${item[3]}','_blank')" style="background:#3498db; color:white; border:none; padding:8px; border-radius:5px;"><i class="fas fa-map"></i></button></td></tr>`;
+                });
+            } catch (e) { tbody.innerHTML = "Gagal muat data."; }
+        }
+        window.onload = loadLaporan;
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Login - GARDA DUMAI KOTA</title>
+</head>
+<body style="background:#1a1a1a; height:100vh; display:flex; justify-content:center; align-items:center; font-family:sans-serif;">
+    <div style="background:#fff; padding:30px; border-radius:12px; width:300px; text-align:center;">
+        <i class="fas fa-shield-alt" style="font-size:40px; color:#e74c3c;"></i>
+        <h2 style="margin:15px 0;">COMMAND CENTER</h2>
+        <input type="text" id="user" placeholder="Username" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">
+        <input type="password" id="pass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:5px; box-sizing:border-box;">
+        <button onclick="auth()" style="width:100%; padding:12px; background:#e74c3c; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">MASUK</button>
+    </div>
+    <script>
+        function auth() {
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+            const admins = ["camat", "sekcam", "trantib", "kapolsek", "danramil"];
+            const kels = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
+            const roles = ["lurah", "babinsa", "bhabin", "pamong", "trantib"];
+            let role = "", label = "";
+            if(admins.includes(u) && p === "dksiaga") { role="admin"; label=u.toUpperCase(); }
+            else {
+                kels.forEach(k => roles.forEach(r => {
+                    if(u === `${r}-${k}` && p === "pantaudk") { role="operator"; label=u.toUpperCase().replace("-"," "); }
+                }));
+            }
+            if(role) {
+                localStorage.setItem("role", role); localStorage.setItem("user_label", label);
+                window.location.href = role === "admin" ? "index.html" : "../operator/index.html";
+            } else alert("Akses Ditolak!");
+        }
+    </script>
+</body>
+</html>

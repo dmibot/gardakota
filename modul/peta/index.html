@@ -1,89 +1,26 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <title>Peta Situasi</title>
-    <style>
-        #map { width: 100%; height: calc(100vh - 60px); }
-        .leaflet-control-layers { border-radius: 8px !important; box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important; }
-    </style>
+    <title>Peta Sebaran Laporan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>#map { height: 100vh; width: 100%; }</style>
 </head>
-<body>
-    <div class="app-header">
-        <a href="../../index.html" class="header-icon" style="color:white; text-decoration:none;">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1>PETA SITUASI KOTA</h1>
-        <div style="width:35px;"></div>
-    </div>
-
+<body style="margin:0;">
     <div id="map"></div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. Inisialisasi Layer
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-            attribution: 'OSM' 
-        });
-        
-        const satelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Esri World Imagery'
-        });
-
-        const cuaca = L.tileLayer('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=99db324317112028688849b3803029f6', {
-            attribution: 'RainViewer'
-        });
-
-        // 2. Setup Peta (Default OSM)
-        const map = L.map('map', {
-            center: [1.67, 101.45],
-            zoom: 13,
-            layers: [osm]
-        });
-
-        // 3. Kontrol Layer (Pilihan Mode)
-        const baseMaps = {
-            "Peta Jalan": osm,
-            "Satelit (Esri)": satelit
-        };
-        
-        const overlayMaps = {
-            "Radar Hujan": cuaca
-        };
-
-        L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
-
-        // 4. Load Data Marker dari Database SAKTI
+        const map = L.map('map').setView([1.68, 101.44], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         async function loadMarkers() {
             try {
                 const res = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
                 const data = await res.json();
-                
                 data.laporan.forEach(item => {
-                    // Regex untuk ambil koordinat dari link google maps
-                    const coordMatch = item[4].match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
-                    if (coordMatch) {
-                        const lat = coordMatch[1];
-                        const lng = coordMatch[2];
-                        const status = item[6] === 'Selesai' ? 'green' : 'red';
-                        
-                        L.circleMarker([lat, lng], {
-                            radius: 8,
-                            fillColor: status,
-                            color: "#fff",
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.8
-                        }).addTo(map)
-                        .bindPopup(`<b>${item[1]}</b><br>${item[2]}<br><small>Status: ${item[6]}</small>`);
-                    }
+                    const loc = item[3].match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
+                    if(loc) L.marker([loc[1], loc[2]]).addTo(map).bindPopup("<b>" + item[2] + "</b><br>" + item[4]);
                 });
-            } catch (e) {
-                console.error("Gagal memuat marker peta.");
-            }
+            } catch(e) { console.log("Gagal muat peta"); }
         }
         loadMarkers();
     </script>
