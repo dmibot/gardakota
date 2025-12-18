@@ -1,30 +1,14 @@
-:root { --primary: #0066FF; --dark: #001a4d; --bg: #f4f7f6; --h: 60px; --nav: 70px; }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { 
-    font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: var(--bg); 
-    padding-top: calc(var(--h) + 10px); 
-    padding-bottom: calc(var(--nav) + 30px); /* Tambah ruang agar tidak tertutup nav */
-}
+:root { --primary: #0066FF; --dark: #001a4d; --bg: #f4f7f6; --h: 60px; }
+body { font-family: sans-serif; margin: 0; background: var(--bg); padding-top: var(--h); }
 .app-header { 
     height: var(--h); background: var(--dark); color: white; 
-    display: flex; align-items: center; justify-content: space-between; 
-    padding: 0 20px; position: fixed; top: 0; width: 100%; z-index: 2000; 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+    display: flex; align-items: center; padding: 0 15px; 
+    position: fixed; top: 0; width: 100%; z-index: 2000;
+    justify-content: space-between;
 }
-.app-header h1 { font-size: 14px; margin: 0; text-transform: uppercase; font-weight: 800; }
-.container { padding: 15px; max-width: 500px; margin: auto; }
-.card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-.btn-main { 
-    height: 50px; display: flex; align-items: center; justify-content: center; 
-    background: var(--primary); color: white; border: none; border-radius: 12px; 
-    width: 100%; font-weight: 700; text-decoration: none; cursor: pointer; font-size: 15px;
-}
-.bottom-nav { 
-    height: var(--nav); position: fixed; bottom: 0; width: 100%; 
-    background: white; display: flex; border-top: 1px solid #eee; z-index: 2000; 
-}
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; text-decoration: none; font-size: 10px; }
-.nav-item.active { color: var(--primary); font-weight: bold; }
-.nav-item i { font-size: 22px; margin-bottom: 3px; }
-label { font-size: 11px; font-weight: 800; color: var(--dark); display: block; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
-input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; background: #fafafa; font-size: 14px; }
+.app-header h1 { font-size: 14px; margin: 0; flex: 1; text-align: center; }
+.header-icon { width: 30px; font-size: 20px; text-decoration: none; }
+.container { padding: 15px; }
+.card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }

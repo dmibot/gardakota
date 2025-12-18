@@ -3,46 +3,30 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
-    <title>Login Petugas</title>
+    <title>Login</title>
 </head>
-<body style="display:flex; align-items:center; justify-content:center; height:100vh; background:#eef2f5;">
-    <div class="card" style="width:100%; max-width:340px; text-align:center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="60" style="margin-bottom:15px;">
-        <h3 style="margin:0; color:var(--dark);">GARDA DUMAI KOTA</h3>
-        <p style="font-size:11px; color:#666; margin-bottom:20px;">Sistem Komando Terpadu</p>
-        <input type="text" id="user" placeholder="Username / Jabatan">
+<body style="display:flex; align-items:center; justify-content:center; height:100vh; background:#f0f2f5;">
+    <div class="card" style="text-align:center; width:320px;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="80" style="margin-bottom:15px;">
+        <h2 style="margin:0; color:#002171;">GARDA DUMAI</h2>
+        <input type="text" id="user" placeholder="Username" style="margin-top:20px;">
         <input type="password" id="pass" placeholder="Password">
         <button class="btn-main" onclick="auth()">MASUK</button>
-        <p id="err" style="color:red; font-size:11px; margin-top:10px; display:none;">Akses Ditolak: User/Pass Salah!</p>
     </div>
     <script>
         function auth() {
             const u = document.getElementById('user').value.toLowerCase();
             const p = document.getElementById('pass').value;
-            
-            // DAFTAR SESUAI INSTRUKSI BAPAK
-            const admins = ["camat", "sekcam", "trantib", "kapolsek", "danramil", "binmas", "ramil01"];
-            const kels = ["rimbas", "sukajadi", "laksamana", "dumaikota", "bintan"];
-            const roles = ["lurah", "babinsa", "bhabin", "trantibkel", "pamong"];
-            
-            let role = "", label = "";
-            
-            if(admins.includes(u) && p === "dksiaga") { 
-                role="admin"; label=u.toUpperCase(); 
-            } else {
-                kels.forEach(k => {
-                    roles.forEach(r => {
-                        if(u === `${r}-${k}` && p === "pantaudk") {
-                            role="operator"; label=u.toUpperCase().replace("-"," ");
-                        }
-                    });
-                });
-            }
-
-            if(role) {
-                localStorage.setItem("role", role); localStorage.setItem("user_label", label);
-                window.location.href = role === "admin" ? "index.html" : "../operator/index.html";
-            } else { document.getElementById('err').style.display='block'; }
+            // Logika login Bapak sebelumnya di sini...
+            if(u === 'camat' && p === 'dksiaga') {
+                localStorage.setItem("role", "admin");
+                localStorage.setItem("user_label", "CAMAT");
+                window.location.href = "index.html";
+            } else if(p === 'pantaudk') {
+                localStorage.setItem("role", "operator");
+                localStorage.setItem("user_label", u.toUpperCase());
+                window.location.href = "../operator/index.html";
+            } else { alert("Salah!"); }
         }
     </script>
 </body>

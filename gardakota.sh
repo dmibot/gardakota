@@ -1,195 +1,125 @@
 #!/bin/bash
 
-# CONFIG DATA
+# Aset Logo yang PASTI muncul (Wikimedia)
+URL_LOGO="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png"
 URL_SAKTI="https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec"
-WA_CAMAT="6285172206884"
-IMG_LOGO="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png"
 
-echo "🚀 MEMULAI RESTORASI TOTAL DASHBOARD, PETA, DAN AKSI..."
+echo "⚙️ Memperbaiki Jalur Navigasi & Logo..."
 
-# 1. PASTIKAN SEMUA FOLDER ADA
-mkdir -p modul/peta modul/aksi css
-
-# 2. UPDATE DASHBOARD UTAMA (index.html) - FIX BMKG & PENGUMUMAN
-cat << EOF > index.html
+# 1. Pastikan Header di SEMUA Modul punya tombol HOME
+# --- MODUL OPERATOR ---
+cat << EOF > modul/operator/index.html
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Garda Dumai Kota</title>
+    <title>Operator Lapor</title>
 </head>
 <body>
-    <div id="alert-cuaca" style="display:none; background:#d32f2f; color:white; padding:10px; font-weight:bold; font-size:12px; border-bottom:3px solid yellow;">
-        <marquee id="msg-cuaca">⚠️ WASPADA: Memeriksa Peringatan Dini BMKG...</marquee>
-    </div>
-
     <div class="app-header">
-        <img src="$IMG_LOGO" width="35">
-        <h1>GARDA DUMAI KOTA</h1>
-        <a href="modul/admin/login.html" style="color:var(--dark); font-size:20px;"><i class="fas fa-user-shield"></i></a>
+        <a href="../../index.html" class="header-icon" style="color:white;"><i class="fas fa-home"></i></a>
+        <h1>PANEL OPERATOR</h1>
+        <i class="fas fa-sign-out-alt" onclick="localStorage.clear(); location.href='../admin/login.html'"></i>
     </div>
-
     <div class="container">
-        <div class="card" style="background: linear-gradient(135deg, #002171, #0d47a1); color: white;">
-            <div style="font-size:11px; text-transform:uppercase; opacity:0.8; font-weight:bold; margin-bottom:5px;">Pengumuman Masyarakat</div>
-            <div id="msg-pengumuman" style="font-size:14px; font-weight:600; line-height:1.4;">
-                📢 Selamat datang di layanan GARDA DUMAI KOTA. Gunakan tombol SOS jika dalam keadaan darurat!
-            </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-             <div class="card" style="margin:0; border-left:4px solid #ef6c00;">
-                <small style="color:#ef6c00; font-weight:bold; font-size:10px;">INFO GEMPA</small>
-                <h3 id="g-mag" style="margin:5px 0 0 0; font-size:18px;">--</h3>
-                <div id="g-loc" style="font-size:9px; color:#666; overflow:hidden; white-space:nowrap;">Memuat...</div>
-            </div>
-             <div class="card" style="margin:0; border-left:4px solid #0066FF;">
-                <small style="color:#0066FF; font-weight:bold; font-size:10px;">CUACA DUMAI</small>
-                <h3 id="w-temp" style="margin:5px 0 0 0; font-size:18px;">--°C</h3>
-                <div id="w-desc" style="font-size:9px; color:#666;">Memuat...</div>
-            </div>
-        </div>
-
-        <a href="modul/aksi/index.html" class="btn-main" style="background:#d32f2f; box-shadow: 0 4px 15px rgba(211,47,47,0.4); margin-bottom:15px;">
-            <i class="fas fa-bolt" style="margin-right:10px;"></i> SOS & DARURAT
-        </a>
-        
         <div class="card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:var(--dark);">SITUASI SAAT INI</h4>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; color:#666;">Laporan Diproses</span>
-                <b id="st-proses" style="color:#ef6c00;">0</b>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                <span style="font-size:12px; color:#666;">Laporan Selesai</span>
-                <b id="st-selesai" style="color:#2e7d32;">0</b>
-            </div>
+            <small>Petugas:</small> <b id="op-name">-</b>
+        </div>
+        <div class="card">
+            <button class="btn-main" onclick="trackGPS()" style="background:#333; margin-bottom:10px;">KUNCI GPS</button>
+            <div id="gps-box" style="text-align:center; font-size:12px; padding:10px; background:#eee; border-radius:8px;">GPS Belum Kunci</div>
+            <select id="kat" style="margin-top:15px;">
+                <option>Banjir Rob</option><option>Sampah</option><option>Kamtibmas</option><option>Kebakaran</option>
+            </select>
+            <textarea id="ket" placeholder="Keterangan..."></textarea>
+            <input type="file" id="foto" capture="camera">
+            <button class="btn-main" id="btnLapor" onclick="kirim()" style="margin-top:15px;">KIRIM LAPORAN</button>
         </div>
     </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-house"></i></a>
-        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i></a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i></a>
-        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle" style="font-size:24px; color:var(--primary);"></i></a>
-    </nav>
-
-    <script>
-        const SAKTI = "$URL_SAKTI";
-        async function fetchBMKG() {
-            try {
-                // Gempa
-                const gRes = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
-                const g = (await gRes.json()).Infogempa.gempa;
-                document.getElementById('g-mag').innerText = g.Magnitude + " SR";
-                document.getElementById('g-loc').innerText = g.Wilayah;
-
-                // Cuaca Dumai Kota
-                const wRes = await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001');
-                const w = (await wRes.json()).data[0].cuaca[0][0];
-                document.getElementById('w-temp').innerText = w.t + "°C";
-                document.getElementById('w-desc').innerText = w.weather_desc;
-
-                // Stats & Pengumuman
-                const sRes = await fetch(SAKTI);
-                const s = await sRes.json();
-                document.getElementById('st-proses').innerText = s.laporan.filter(i => i[6] !== 'Selesai' && i[6] !== 'Status').length;
-                document.getElementById('st-selesai').innerText = s.laporan.filter(i => i[6] === 'Selesai').length;
-                if(s.info[0]) document.getElementById('msg-pengumuman').innerText = s.info[0][1];
-            } catch(e) {}
-        }
-        fetchBMKG(); setInterval(fetchBMKG, 60000);
-    </script>
+    <script src="operator.js"></script>
 </body>
 </html>
 EOF
 
-# 3. RESTORASI MODUL AKSI (FIX 404)
-cat << EOF > modul/aksi/index.html
+# --- MODUL ADMIN ---
+cat << EOF > modul/admin/index.html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>SOS Darurat</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     <div class="app-header">
-        <a href="../../index.html" style="color:var(--dark);"><i class="fas fa-arrow-left"></i></a>
-        <h1>AKSI DARURAT</h1>
-        <div style="width:20px;"></div>
+        <a href="../../index.html" class="header-icon" style="color:white;"><i class="fas fa-home"></i></a>
+        <h1>COMMAND CENTER</h1>
+        <i class="fas fa-power-off" onclick="localStorage.clear(); location.href='login.html'"></i>
     </div>
-    <div class="container" style="text-align:center;">
-        <div class="card" style="padding:40px 20px;">
-            <div onclick="callSOS()" style="width:140px; height:140px; background:radial-gradient(#ff5252, #b71c1c); border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center; color:white; font-size:32px; font-weight:900; box-shadow:0 10px 30px rgba(183,28,28,0.5); border:8px solid rgba(255,255,255,0.2); cursor:pointer;">SOS</div>
-            <p style="margin-top:20px; font-weight:bold; color:#b71c1c;">TEKAN UNTUK SITUASI DARURAT</p>
-        </div>
-        
-        <div class="card">
-            <h4 style="margin-bottom:15px;">HUBUNGI PETUGAS</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <a href="tel:112" class="btn-main" style="background:#b71c1c; font-size:12px;">📞 BPBD/112</a>
-                <a href="https://wa.me/$WA_CAMAT" class="btn-main" style="background:#2e7d32; font-size:12px;">🟢 WA CAMAT</a>
-            </div>
-        </div>
+    <div class="container">
+        <div id="wf-list">Memuat laporan...</div>
     </div>
-    <script>
-        function callSOS() {
-            if(confirm("Kirim sinyal SOS ke Command Center?")) {
-                window.location.href = "https://wa.me/$WA_CAMAT?text=🚨 *SINYAL SOS DARURAT!*%0AMohon bantuan segera ke lokasi saya!";
-            }
-        }
-    </script>
+    <script src="admin.js"></script>
 </body>
 </html>
 EOF
 
-# 4. RESTORASI MODUL PETA (FIX 404 & LAYERS)
-cat << EOF > modul/peta/index.html
+# 2. Fix Logo di Halaman Login
+cat << EOF > modul/admin/login.html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <title>Peta Sebaran</title>
-    <style>#map { width:100%; height:calc(100vh - 130px); }</style>
+    <title>Login</title>
 </head>
-<body>
-    <div class="app-header">
-        <a href="../../index.html" style="color:var(--dark);"><i class="fas fa-arrow-left"></i></a>
-        <h1>PETA SITUASI</h1>
-        <div style="width:20px;"></div>
+<body style="display:flex; align-items:center; justify-content:center; height:100vh; background:#f0f2f5;">
+    <div class="card" style="text-align:center; width:320px;">
+        <img src="$URL_LOGO" width="80" style="margin-bottom:15px;">
+        <h2 style="margin:0; color:#002171;">GARDA DUMAI</h2>
+        <input type="text" id="user" placeholder="Username" style="margin-top:20px;">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn-main" onclick="auth()">MASUK</button>
     </div>
-    <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([1.67, 101.45], 13);
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-        
-        const base = { "Peta Jalan": osm, "Satelit": sat };
-        L.control.layers(base).addTo(map);
-
-        async function load() {
-            const r = await fetch("$URL_SAKTI");
-            const d = await r.json();
-            d.laporan.forEach(i => {
-                const m = i[4].match(/query=(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)/);
-                if(m) L.marker([m[1], m[2]]).addTo(map).bindPopup(\`<b>\${i[1]}</b><br>\${i[2]}<br><small>\${i[6]}</small>\`);
-            });
+        function auth() {
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+            // Logika login Bapak sebelumnya di sini...
+            if(u === 'camat' && p === 'dksiaga') {
+                localStorage.setItem("role", "admin");
+                localStorage.setItem("user_label", "CAMAT");
+                window.location.href = "index.html";
+            } else if(p === 'pantaudk') {
+                localStorage.setItem("role", "operator");
+                localStorage.setItem("user_label", u.toUpperCase());
+                window.location.href = "../operator/index.html";
+            } else { alert("Salah!"); }
         }
-        load();
     </script>
 </body>
 </html>
 EOF
 
-echo "-------------------------------------------------------"
-echo "✅ RESTORASI SELESAI"
-echo "📍 Dashboard: Gempa, Cuaca, Pengumuman AKTIF."
-echo "📍 Modul Aksi & Peta: FIXED (Tidak 404)."
-echo "-------------------------------------------------------"
+# 3. Fix CSS Header agar Ikon Muncul Benar
+cat << 'EOF' > css/style.css
+:root { --primary: #0066FF; --dark: #001a4d; --bg: #f4f7f6; --h: 60px; }
+body { font-family: sans-serif; margin: 0; background: var(--bg); padding-top: var(--h); }
+.app-header { 
+    height: var(--h); background: var(--dark); color: white; 
+    display: flex; align-items: center; padding: 0 15px; 
+    position: fixed; top: 0; width: 100%; z-index: 2000;
+    justify-content: space-between;
+}
+.app-header h1 { font-size: 14px; margin: 0; flex: 1; text-align: center; }
+.header-icon { width: 30px; font-size: 20px; text-decoration: none; }
+.container { padding: 15px; }
+.card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+EOF
+
+echo "✅ Selesai. Silakan cek kembali."

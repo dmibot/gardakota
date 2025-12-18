@@ -1,61 +1,32 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Lapor - Garda Dumai Kota</title>
+    <title>Operator Lapor</title>
 </head>
 <body>
     <div class="app-header">
+        <a href="../../index.html" class="header-icon" style="color:white;"><i class="fas fa-home"></i></a>
         <h1>PANEL OPERATOR</h1>
-        <i class="fas fa-power-off" onclick="localStorage.clear(); location.href='../admin/login.html'"></i>
+        <i class="fas fa-sign-out-alt" onclick="localStorage.clear(); location.href='../admin/login.html'"></i>
     </div>
-
     <div class="container">
-        <div class="card" style="background: #e3f2fd; border-left: 5px solid #0066FF;">
-            <small style="color: #0066FF; font-weight: bold;">PETUGAS AKTIF:</small>
-            <h4 id="op-name" style="margin: 5px 0 0 0; color: #001a4d;">-</h4>
-        </div>
-
         <div class="card">
-            <label>I. LOKASI KEJADIAN (GPS)</label>
-            <div id="gps-box" style="padding:15px; background:#f5f5f5; border: 2px dashed #ccc; border-radius:10px; text-align:center; font-size:12px; margin-bottom:10px; font-weight:bold;">📍 Belum Mengunci Titik</div>
-            <button class="btn-main" onclick="trackGPS()" style="background:#333; height: 40px;"><i class="fas fa-crosshairs"></i>&nbsp; KUNCI GPS</button>
-            
-            <label>II. JENIS KEJADIAN</label>
-            <select id="kat">
-                <option>🌊 Banjir Rob / Pasang Keling</option>
-                <option>🕳️ Drainase Tersumbat / Banjir</option>
-                <option>🗑️ Penumpukan Sampah</option>
-                <option>👮 Kamtibmas / Tawuran</option>
-                <option>🔥 Kebakaran Lahan / Karhutla</option>
-                <option>💡 Lampu Jalan Mati (PJU)</option>
-                <option>🛣️ Infrastruktur / Jalan Rusak</option>
-                <option>🌳 Pohon Tumbang / Kabel</option>
-                <option>🏪 Penertiban PKL / Perda</option>
-                <option>📄 Layanan Publik / Administrasi</option>
-                <option>❓ Lainnya</option>
+            <small>Petugas:</small> <b id="op-name">-</b>
+        </div>
+        <div class="card">
+            <button class="btn-main" onclick="trackGPS()" style="background:#333; margin-bottom:10px;">KUNCI GPS</button>
+            <div id="gps-box" style="text-align:center; font-size:12px; padding:10px; background:#eee; border-radius:8px;">GPS Belum Kunci</div>
+            <select id="kat" style="margin-top:15px;">
+                <option>Banjir Rob</option><option>Sampah</option><option>Kamtibmas</option><option>Kebakaran</option>
             </select>
-
-            <label>III. DETAIL KETERANGAN</label>
-            <textarea id="ket" rows="3" placeholder="Sebutkan patokan lokasi & kondisi..."></textarea>
-
-            <label>IV. FOTO BUKTI LAPANGAN</label>
-            <input type="file" id="foto" accept="image/*" capture="camera">
-
-            <button class="btn-main" id="btnLapor" onclick="kirim()" style="margin-top:20px;">
-                <i class="fas fa-paper-plane"></i>&nbsp; KIRIM LAPORAN SEKARANG
-            </button>
+            <textarea id="ket" placeholder="Keterangan..."></textarea>
+            <input type="file" id="foto" capture="camera">
+            <button class="btn-main" id="btnLapor" onclick="kirim()" style="margin-top:15px;">KIRIM LAPORAN</button>
         </div>
     </div>
-
-    <nav class="bottom-nav">
-        <a href="../../index.html" class="nav-item"><i class="fas fa-house"></i></a>
-        <a href="../peta/index.html" class="nav-item"><i class="fas fa-map"></i></a>
-        <a href="#" class="nav-item active"><i class="fas fa-plus-circle"></i></a>
-    </nav>
-
     <script src="operator.js"></script>
 </body>
 </html>
