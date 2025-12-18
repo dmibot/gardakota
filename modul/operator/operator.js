@@ -12,7 +12,7 @@ let infoKec = "";
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Analisis 3 Layer Wilayah...";
+    box.innerHTML = "⌛ Mencari Data Wilayah (Auto Level 13-15)...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
@@ -20,35 +20,42 @@ async function ambilLokasi() {
         lng = p.coords.longitude;
         
         try {
-            // Kita tarik data Max Zoom 18 agar Baris 1 (Jalan) tetap dapat datanya.
-            // Untuk Baris 2 & 3 nanti kita filter manual dari objek 'addr'.
+            // Kita tarik data Max Zoom 18 agar semua variabel tersedia di JSON
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=18&accept-language=id-ID&format=jsonv2`);
             const data = await response.json();
             const addr = data.address;
             
-            // --- LOGIKA 3 BARIS SESUAI PERMINTAAN ---
+            // --- LOGIKA CERDAS 3 BARIS ---
 
-            // BARIS 1: Max Zoom 18 (Deteksi Jalan)
-            // Mengambil entity jalanan
-            let nmJalan = addr.road || addr.pedestrian || addr.path || addr.track || "";
+            // BARIS 1: NAMA JALAN (Level 18)
+            let nmJalan = addr.road || addr.pedestrian || addr.path || "";
             infoJalan = nmJalan ? `Jln. ${nmJalan}` : "(Jalan tdk terdeteksi)";
 
-            // BARIS 2: Max Zoom 13 (Deteksi Kelurahan)
-            // Sesuai standar OSM Level 13, entity yang muncul hanya: Village, Suburb, Town.
-            // Kita BAIKOT 'neighbourhood', 'quarter', 'hamlet' agar tidak merusak nama kelurahan.
-            let nmKel = addr.village || addr.suburb || addr.town || "";
+            // BARIS 2: KELURAHAN (Cek Bertingkat 13 -> 14 -> 15)
+            let rawKel = "";
             
-            // Fallback darurat: Jika kosong, baru cek neighbourhood (jarang terjadi di Level 13)
-            if(!nmKel) nmKel = "Wilayah Tidak Terdeteksi";
+            // Cek 1: Level 13 (Kelurahan Murni)
+            if (addr.village) rawKel = addr.village;
+            else if (addr.suburb) rawKel = addr.suburb;
+            else if (addr.town) rawKel = addr.town;
             
-            infoKel = `Kel. ${nmKel}`;
+            // Cek 2: Level 14 (Lingkungan - Jika Lvl 13 kosong)
+            else if (addr.neighbourhood) rawKel = addr.neighbourhood;
+            
+            // Cek 3: Level 15 (Dusun/Quarter - Jika Lvl 14 kosong)
+            else if (addr.quarter) rawKel = addr.quarter;
+            else if (addr.hamlet) rawKel = addr.hamlet;
+            
+            // Fallback terakhir
+            else rawKel = "Wilayah Tidak Terdeteksi";
 
-            // BARIS 3: Max Zoom 12 (Deteksi Kecamatan)
-            // Mengambil entity administrasi distrik
+            infoKel = `Kel. ${rawKel}`;
+
+            // BARIS 3: KECAMATAN (Level 12)
             let nmKec = addr.city_district || addr.district || addr.city || "Dumai";
             infoKec = `Kec. ${nmKec}`;
 
-            // TAMPILAN UI (HIJAU STABIL)
+            // TAMPILAN UI
             let tampilanHTML = `
                 ✅ TERKUNCI<br>
                 <div style="text-align:left; margin-top:8px; padding-left:12px; border-left:4px solid #2e7d32;">
@@ -65,7 +72,7 @@ async function ambilLokasi() {
             box.style.border = "1px solid #c8e6c9";
             
         } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing detail wilayah (Koneksi).</small>";
+            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing (Koneksi).</small>";
         }
     }, (err) => {
         alert("GPS ERROR: Wajib izinkan lokasi!");
@@ -87,12 +94,9 @@ async function kirimLaporan() {
         let fd = new FormData(); fd.append("image", file);
         let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
         let dataImg = await resImg.json();
-        
-        // Link Maps
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
-        // FORMAT LAPORAN MASUK DATABASE:
-        // [Kel. X, Kec. Y | Jln. Z] Keterangan User
+        // FORMAT DB: [Kel. X, Kec. Y | Jln. Z] Keterangan
         const wilayahFull = `[${infoKel}, ${infoKec} | ${infoJalan}]`;
 
         await fetch(SAKTI, {
@@ -107,7 +111,7 @@ async function kirimLaporan() {
             })
         });
 
-        alert("Laporan Berhasil Terkirim!");
+        alert("Laporan Terkirim!");
         window.location.reload();
     } catch(e) {
         alert("Gagal Kirim!");
