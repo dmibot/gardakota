@@ -6,11 +6,14 @@ if(!label) window.location.href="../admin/login.html";
 document.getElementById('op-name').innerText = label;
 
 let lat = "", lng = "";
-let wilayahInfo = "Menunggu GPS...";
+// Variabel global untuk menyimpan alamat lengkap 3 baris
+let infoJalan = "";
+let infoKel = "";
+let infoKec = "";
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Mendeteksi Wilayah (Level 15)...";
+    box.innerHTML = "⌛ Mengurai Data Lokasi (3 Layer)...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
@@ -18,36 +21,49 @@ async function ambilLokasi() {
         lng = p.coords.longitude;
         
         try {
-            // SET ZOOM=15 SESUAI INSTRUKSI (Level Kelurahan/Suburb)
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=15&accept-language=id-ID&format=jsonv2`);
+            // Tarik data maksimal (Zoom 18) agar dapat semua komponen
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=18&accept-language=id-ID&format=jsonv2`);
             const data = await response.json();
             const addr = data.address;
             
-            // LOGIKA PARSING
-            // Di Level 15, biasanya 'road' hilang dan digantikan fokus ke 'village'/'suburb'
-            
-            // 1. Ambil Nama Wilayah
-            let area = addr.village || addr.suburb || addr.quarter || addr.neighbourhood || addr.city || "Wilayah Dumai";
-            
-            // 2. Ambil Kecamatan/Kota (Parent)
-            let parent = addr.city_district || addr.district || addr.city || "Riau";
+            // --- PEMETAAN 3 BARIS SESUAI INSTRUKSI BAPAK ---
 
-            // Format Tampilan: "Kel. Teluk Binjai, Dumai"
-            let prefix = "";
-            if(addr.village || addr.suburb) prefix = "Kel. ";
+            // BARIS 1: Level Jalan (Zoom 18)
+            // Prioritas: Nama Jalan > Nama Gedung > "Jalan tdk terdeteksi"
+            let nmJalan = addr.road || addr.pedestrian || addr.building || "";
+            infoJalan = nmJalan ? `Jln. ${nmJalan}` : "(Jalan tdk terdeteksi)";
+
+            // BARIS 2: Level Kelurahan (Zoom 15)
+            // Prioritas: Village > Suburb > Neighbourhood
+            let nmKel = addr.village || addr.suburb || addr.neighbourhood || "";
+            infoKel = nmKel ? `Kel. ${nmKel}` : "(Kelurahan tdk terdeteksi)";
+
+            // BARIS 3: Level Kecamatan/Kota (Zoom 12)
+            // Prioritas: City District > District > City
+            let nmKec = addr.city_district || addr.district || addr.city || "Dumai";
+            infoKec = `Kec. ${nmKec}`;
+
+            // TAMPILAN DI UI (3 BARIS RAPI)
+            let tampilanHTML = `
+                ✅ TERKUNCI<br>
+                <div style="text-align:left; margin-top:5px; padding-left:10px; border-left:3px solid #2e7d32;">
+                    <div style="font-size:11px; color:#555;">${infoJalan}</div>
+                    <div style="font-size:14px; font-weight:bold; color:#000;">${infoKel}</div>
+                    <div style="font-size:12px; color:#555;">${infoKec}</div>
+                </div>
+                <small style="color:#aaa; font-size:9px;">${lat}, ${lng}</small>
+            `;
             
-            wilayahInfo = `${prefix}${area}, ${parent}`;
-            
-            box.innerHTML = `✅ TERKUNCI<br><span style="color:#2e7d32; font-size:16px; font-weight:800;">${wilayahInfo}</span><br><small style="color:#666;">${lat}, ${lng}</small>`;
+            box.innerHTML = tampilanHTML;
             box.style.background = "#e8f5e9";
             box.style.color = "#2e7d32";
             box.style.borderColor = "#2e7d32";
             
         } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Sinyal GPS Oke, Nama wilayah timeout.</small>";
+            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing detail wilayah.</small>";
         }
     }, (err) => {
-        alert("Wajib izinkan lokasi!");
+        alert("GPS ERROR: Aktifkan Lokasi!");
         box.innerText = "❌ GPS Mati";
     }, { enableHighAccuracy: true });
 }
@@ -68,13 +84,17 @@ async function kirimLaporan() {
         let dataImg = await resImg.json();
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
+        // Gabungkan 3 Baris Info ke dalam satu string keterangan
+        // Format: [Kel. X, Kec. Y | Jln. Z] Keterangan User
+        const wilayahFull = `[${infoKel}, ${infoKec} | ${infoJalan}]`;
+
         await fetch(SAKTI, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({
                 nama: label,
                 kategori: kat,
-                keterangan: `[${wilayahInfo}] ${ket}`,
+                keterangan: `${wilayahFull} ${ket}`,
                 lokasi: mapsUrl,
                 foto: dataImg.data.url
             })
