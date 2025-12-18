@@ -6,41 +6,53 @@ if(!label) window.location.href="../admin/login.html";
 document.getElementById('op-name').innerText = label;
 
 let lat = "", lng = "";
-let wilayahInfo = "Luar Wilayah";
+let wilayahInfo = "Kec. Dumai Kota";
+
+// DATABASE TITIK TENGAH KELURAHAN (DUMAI KOTA)
+const TITIK_KELURAHAN = [
+    { nama: "Kel. Laksamana", lat: 1.6811, lng: 101.4455 },
+    { nama: "Kel. Bintan", lat: 1.6755, lng: 101.4468 },
+    { nama: "Kel. Dumai Kota", lat: 1.6778, lng: 101.4528 },
+    { nama: "Kel. Rimba Sekampung", lat: 1.6698, lng: 101.4425 },
+    { nama: "Kel. Sukajadi", lat: 1.6712, lng: 101.4495 }
+];
+
+// Fungsi Hitung Jarak Terdekat (Haversine)
+function hitungKelurahan(userLat, userLng) {
+    let terdekat = "";
+    let jarakMin = Infinity;
+
+    TITIK_KELURAHAN.forEach(kel => {
+        const d = Math.sqrt(Math.pow(userLat - kel.lat, 2) + Math.pow(userLng - kel.lng, 2));
+        if (d < jarakMin) {
+            jarakMin = d;
+            terdekat = kel.nama;
+        }
+    });
+    return terdekat;
+}
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Menghubungkan Satelit BMKG & GPS...";
+    box.innerHTML = "⌛ Menghitung Posisi Kelurahan...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
         lat = p.coords.latitude; 
         lng = p.coords.longitude;
         
-        try {
-            // MENGGUNAKAN BIGDATACLOUD / BIG DATA API UNTUK AKURASI INDONESIA LEBIH BAIK
-            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`);
-            const data = await response.json();
-            
-            // Logika Pemetaan Wilayah Dumai
-            const kelurahan = data.locality || data.principalSubdivision || "Dumai";
-            const kecamatan = data.city || "Dumai Kota";
-            
-            wilayahInfo = `${kelurahan}, ${kecamatan}`;
-            
-            box.innerHTML = `✅ TERKUNCI<br><span style="color:#2e7d32; font-size:15px; font-weight:800;">${wilayahInfo}</span><br><small style="color:#666;">${lat}, ${lng}</small>`;
-            box.style.background = "#e8f5e9";
-            box.style.color = "#2e7d32";
-            box.style.borderColor = "#2e7d32";
-            
-        } catch (err) {
-            // Fallback jika API pertama gagal
-            box.innerHTML = "✅ TERKUNCI<br><small>Gagal mendeteksi nama jalan, koordinat GPS aman.</small>";
-            box.style.background = "#e8f5e9";
-        }
+        // Deteksi Kelurahan Berdasarkan Koordinat Terdekat
+        const namaKel = hitungKelurahan(lat, lng);
+        wilayahInfo = `${namaKel}, Dumai Kota`;
+        
+        box.innerHTML = `✅ TERKUNCI<br><span style="color:#2e7d32; font-size:16px; font-weight:900;">${wilayahInfo}</span><br><small style="color:#666;">${lat}, ${lng}</small>`;
+        box.style.background = "#e8f5e9";
+        box.style.color = "#2e7d32";
+        box.style.borderColor = "#2e7d32";
+        
     }, (err) => {
-        alert("GPS ERROR: Harap berikan izin akses lokasi pada browser HP Anda.");
-        box.innerText = "❌ Sinyal GPS Lemah";
+        alert("GPS ERROR: Aktifkan Lokasi!");
+        box.innerText = "❌ GPS Gagal";
     }, { enableHighAccuracy: true });
 }
 
@@ -50,11 +62,10 @@ async function kirimLaporan() {
     const ket = document.getElementById('ket').value;
     const btn = document.getElementById('btnLapor');
 
-    if(!lat || !lng) return alert("Mohon Kunci Titik GPS terlebih dahulu!");
-    if(!file) return alert("Wajib melampirkan foto bukti!");
-    if(!ket) return alert("Mohon isi detail keterangan!");
+    if(!lat || !lng) return alert("Kunci GPS dulu!");
+    if(!file) return alert("Foto wajib ada!");
 
-    btn.innerText = "⏳ SEDANG MENGIRIM...";
+    btn.innerText = "⏳ MENGIRIM...";
     btn.disabled = true;
 
     try {
@@ -63,7 +74,6 @@ async function kirimLaporan() {
         let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
         let dataImg = await resImg.json();
         
-        // Link Google Maps resmi query-based
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
         await fetch(SAKTI, {
@@ -78,10 +88,10 @@ async function kirimLaporan() {
             })
         });
 
-        alert("Laporan Berhasil Terkirim ke Dashboard!");
+        alert("Laporan Terkirim!");
         window.location.reload();
     } catch(e) {
-        alert("Gagal Terkirim. Periksa Koneksi Internet Anda.");
+        alert("Gagal Kirim!");
         btn.innerText = "🚀 KIRIM KE DASHBOARD";
         btn.disabled = false;
     }
