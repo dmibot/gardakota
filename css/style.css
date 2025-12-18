@@ -1,11 +1,51 @@
-:root { --primary: #002171; --accent: #d32f2f; --bg: #f4f7f6; --h: 65px; --nav: 70px; }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', sans-serif; }
-body { margin: 0; background: var(--bg); padding-top: var(--h); padding-bottom: var(--nav); font-size: 14px; }
-.app-header { height: var(--h); background: var(--primary); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; position: fixed; top: 0; width: 100%; z-index: 2000; border-bottom: 3px solid #ffeb3b; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.container { padding: 12px; max-width: 500px; margin: auto; }
-.card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.btn-main { height: 48px; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; border: none; border-radius: 10px; width: 100%; font-weight: 600; text-decoration: none; cursor: pointer; }
-.bottom-nav { height: var(--nav); position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #ddd; z-index: 2000; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; text-decoration: none; font-size: 10px; }
-.nav-item.active { color: var(--primary); font-weight: bold; }
-.nav-item i { font-size: 20px; margin-bottom: 3px; }
+:root { 
+    --midnight: #001a4d; --blue-accent: #0d47a1; 
+    --gold: #ffeb3b; --danger: #d32f2f; --bg: #f8f9fa;
+    --h: 55px; --nav: 65px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+    font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: var(--bg);
+    padding-top: calc(var(--h) + 10px); padding-bottom: calc(var(--nav) + 20px);
+    line-height: 1.4; color: #333;
+}
+/* Header Tipis & Tajam */
+.app-header { 
+    height: var(--h); background: var(--midnight); color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 15px; position: fixed; top: 0; width: 100%; z-index: 2000;
+    border-bottom: 3px solid var(--gold); box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.app-header h1 { font-size: 15px; font-weight: 800; letter-spacing: 1px; margin: 0; }
+
+/* Container & Card Modern */
+.container { padding: 0 12px; max-width: 500px; margin: auto; }
+.card { 
+    background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px;
+    border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.card-title { font-size: 13px; font-weight: 700; color: var(--midnight); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+/* Tombol Aksi Kompak */
+.btn-group { display: flex; gap: 6px; margin-top: 10px; }
+.btn-small { 
+    flex: 1; height: 36px; border-radius: 6px; border: none; font-size: 11px; 
+    font-weight: 700; cursor: pointer; display: flex; align-items: center; 
+    justify-content: center; text-decoration: none; text-transform: uppercase;
+}
+.btn-blue { background: var(--blue-accent); color: white; }
+.btn-dark { background: #333; color: white; }
+.btn-green { background: #2e7d32; color: white; }
+
+/* Bottom Nav Simetris */
+.bottom-nav { 
+    height: var(--nav); position: fixed; bottom: 0; width: 100%; 
+    background: white; display: flex; border-top: 1px solid #ddd; z-index: 2000;
+    padding-bottom: 5px;
+}
+.nav-item { 
+    flex: 1; display: flex; flex-direction: column; align-items: center; 
+    justify-content: center; color: #757575; text-decoration: none; font-size: 10px;
+}
+.nav-item i { font-size: 18px; margin-bottom: 3px; }
+.nav-item.active { color: var(--blue-accent); font-weight: 900; }
