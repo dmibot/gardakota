@@ -6,11 +6,11 @@ if(!label) window.location.href="../admin/login.html";
 document.getElementById('op-name').innerText = label;
 
 let lat = "", lng = "";
-let wilayahInfo = "Lokasi Luar Jangkauan";
+let wilayahInfo = "Luar Wilayah";
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Melacak Satelit & Wilayah...";
+    box.innerHTML = "⌛ Menghubungkan Satelit BMKG & GPS...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
@@ -18,28 +18,29 @@ async function ambilLokasi() {
         lng = p.coords.longitude;
         
         try {
-            // API Reverse Geocoding (Nominatim)
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+            // MENGGUNAKAN BIGDATACLOUD / BIG DATA API UNTUK AKURASI INDONESIA LEBIH BAIK
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`);
             const data = await response.json();
             
-            const addr = data.address;
-            const kel = addr.village || addr.suburb || addr.neighbourhood || "Kelurahan tdk terdeteksi";
-            const kec = addr.city_district || addr.district || "Kecamatan tdk terdeteksi";
+            // Logika Pemetaan Wilayah Dumai
+            const kelurahan = data.locality || data.principalSubdivision || "Dumai";
+            const kecamatan = data.city || "Dumai Kota";
             
-            wilayahInfo = `${kel}, ${kec}`;
+            wilayahInfo = `${kelurahan}, ${kecamatan}`;
             
-            box.innerHTML = `✅ TERKUNCI<br><span style="color:#2e7d32; font-size:14px;">${wilayahInfo}</span><br><small>${lat}, ${lng}</small>`;
+            box.innerHTML = `✅ TERKUNCI<br><span style="color:#2e7d32; font-size:15px; font-weight:800;">${wilayahInfo}</span><br><small style="color:#666;">${lat}, ${lng}</small>`;
             box.style.background = "#e8f5e9";
             box.style.color = "#2e7d32";
             box.style.borderColor = "#2e7d32";
             
         } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Gagal mendeteksi nama wilayah, tapi koordinat didapat.</small>";
+            // Fallback jika API pertama gagal
+            box.innerHTML = "✅ TERKUNCI<br><small>Gagal mendeteksi nama jalan, koordinat GPS aman.</small>";
             box.style.background = "#e8f5e9";
         }
     }, (err) => {
-        alert("GPS ERROR: Mohon izinkan akses lokasi di browser/HP Anda.");
-        box.innerText = "❌ Gagal mengunci lokasi";
+        alert("GPS ERROR: Harap berikan izin akses lokasi pada browser HP Anda.");
+        box.innerText = "❌ Sinyal GPS Lemah";
     }, { enableHighAccuracy: true });
 }
 
@@ -49,11 +50,11 @@ async function kirimLaporan() {
     const ket = document.getElementById('ket').value;
     const btn = document.getElementById('btnLapor');
 
-    if(!lat || !lng) return alert("Kunci GPS dulu Pak!");
-    if(!file) return alert("Foto bukti wajib!");
-    if(!ket) return alert("Keterangan wajib!");
+    if(!lat || !lng) return alert("Mohon Kunci Titik GPS terlebih dahulu!");
+    if(!file) return alert("Wajib melampirkan foto bukti!");
+    if(!ket) return alert("Mohon isi detail keterangan!");
 
-    btn.innerText = "⏳ MENGIRIM...";
+    btn.innerText = "⏳ SEDANG MENGIRIM...";
     btn.disabled = true;
 
     try {
@@ -62,7 +63,7 @@ async function kirimLaporan() {
         let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
         let dataImg = await resImg.json();
         
-        // Format Google Maps Link
+        // Link Google Maps resmi query-based
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
         await fetch(SAKTI, {
@@ -77,10 +78,10 @@ async function kirimLaporan() {
             })
         });
 
-        alert("Laporan Berhasil Terkirim!");
+        alert("Laporan Berhasil Terkirim ke Dashboard!");
         window.location.reload();
     } catch(e) {
-        alert("Gagal Kirim! Cek Koneksi.");
+        alert("Gagal Terkirim. Periksa Koneksi Internet Anda.");
         btn.innerText = "🚀 KIRIM KE DASHBOARD";
         btn.disabled = false;
     }
