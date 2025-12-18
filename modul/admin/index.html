@@ -20,8 +20,8 @@
 </head>
 <body style="background:#f4f7f6; margin:0; font-family:sans-serif;">
     <div style="background:#1a1a1a; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-        <h1 style="font-size:16px; margin:0;">COMMAND CENTER | <span id="userDisplay">-</span></h1>
-        <button onclick="logout()" style="background:#c0392b; border-radius:4px; padding:6px 12px;">Keluar</button>
+        <h1 style="font-size:16px; margin:0;">COMMAND CENTER | <span id="userDisplay">ADMIN</span></h1>
+        <button onclick="logout()" style="background:#c0392b; border-radius:4px; padding:6px 12px;">Logout</button>
     </div>
 
     <div style="padding: 20px; max-width: 1200px; margin: auto;">
@@ -41,7 +41,9 @@
                         <th style="padding:15px; text-align:center;">KONTROL AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="laporanBody"></tbody>
+                <tbody id="laporanBody">
+                    <tr><td colspan="5" style="text-align:center; padding:50px;">Memuat Data Database...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -50,11 +52,10 @@
     <script>
         const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
         
-        // 1. Cek Login & Display
+        // 1. Jalankan Satpam & Set Nama
         if(typeof proteksiHalaman === 'function') proteksiHalaman('admin');
         document.getElementById("userDisplay").innerText = "Halo, " + (localStorage.getItem("user_label") || "ADMIN");
 
-        // 2. Fungsi Logout
         function logout() {
             if(confirm("Yakin ingin keluar?")) {
                 localStorage.clear();
@@ -62,11 +63,9 @@
             }
         }
 
-        // 3. Fungsi Render Tabel (Tarik Data dari Sheets)
+        // 2. Load Data (PASTI JALAN)
         async function loadLaporan() {
             const tbody = document.getElementById("laporanBody");
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px;">⌛ Sinkronisasi Database SAKTI...</td></tr>';
-
             try {
                 const res = await fetch(SAKTI);
                 const data = await res.json();
@@ -76,7 +75,7 @@
                 tbody.innerHTML = ""; 
 
                 items.reverse().forEach((lap, index) => {
-                    const realID = items.length - index; // ID Baris di Google Sheets
+                    const realID = items.length - index; // ID Baris di Sheets
                     const st = lap[6] || "Menunggu";
                     
                     let stClass = "bg-wait";
@@ -90,29 +89,29 @@
                             <td style="padding:15px;"><div style="color:#2e7d32; font-weight:bold; font-size:12px;">${lap[4]}</div></td>
                             <td style="padding:15px;"><span class="badge ${stClass}">${st}</span></td>
                             <td style="padding:15px; text-align:center;">
-                                <button type="button" class="btn-map" onclick="window.open('${lap[3]}','_blank')" title="Peta"><i class="fas fa-map-marked-alt"></i></button>
-                                <button type="button" class="btn-pro" onclick="updateKeSheets(${realID}, 'Proses')" title="Proses"><i class="fas fa-hard-hat"></i></button>
-                                <button type="button" class="btn-done" onclick="updateKeSheets(${realID}, 'Selesai')" title="Selesai"><i class="fas fa-check-circle"></i></button>
-                                <button type="button" class="btn-del" onclick="hapusDariSheets(${realID})" title="Hapus"><i class="fas fa-trash-alt"></i></button>
+                                <button type="button" class="btn-map" onclick="window.open('${lap[3]}','_blank')"><i class="fas fa-map-marked-alt"></i></button>
+                                <button type="button" class="btn-pro" onclick="updateKeSheets(${realID}, 'Proses')"><i class="fas fa-hard-hat"></i></button>
+                                <button type="button" class="btn-done" onclick="updateKeSheets(${realID}, 'Selesai')"><i class="fas fa-check-circle"></i></button>
+                                <button type="button" class="btn-del" onclick="hapusDariSheets(${realID})"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         </tr>`;
                 });
-            } catch (e) { tbody.innerHTML = "<tr><td colspan='5'>Gagal muat data database.</td></tr>"; }
+            } catch (e) { tbody.innerHTML = "<tr><td colspan='5'>Gagal muat data. Cek koneksi internet.</td></tr>"; }
         }
 
-        // 4. FUNGSI AKSI (Kirim ke Apps Script)
+        // 3. FUNGSI AKSI (WAJIB ADA AGAR TOMBOL BEKERJA)
         async function updateKeSheets(id, status) {
-            if(!confirm("Ubah status baris #" + id + " ke " + status + "?")) return;
-            // Gunakan mode no-cors untuk bypass error CORS Apps Script
-            await fetch(\`\${SAKTI}?action=update&id=\${id}&status=\${status}\`, { method: 'POST', mode: 'no-cors' });
-            alert("✅ Perintah dikirim! Data akan terupdate.");
-            setTimeout(loadLaporan, 2000); // Jeda agar Sheets sempat proses
+            if(!confirm("Ubah status laporan ke " + status + "?")) return;
+            // Gunakan mode no-cors untuk bypass Google Apps Script security
+            await fetch(`${SAKTI}?action=update&id=${id}&status=${status}`, { method: 'POST', mode: 'no-cors' });
+            alert("✅ Perintah Terkirim!");
+            setTimeout(loadLaporan, 2000); // Reload otomatis setelah 2 detik
         }
 
         async function hapusDariSheets(id) {
             if(!confirm("⚠️ Hapus laporan baris #" + id + " secara permanen?")) return;
-            await fetch(\`\${SAKTI}?action=delete&id=\${id}\`, { method: 'POST', mode: 'no-cors' });
-            alert("🗑️ Perintah Hapus dikirim!");
+            await fetch(`${SAKTI}?action=delete&id=${id}`, { method: 'POST', mode: 'no-cors' });
+            alert("🗑️ Laporan Dihapus!");
             setTimeout(loadLaporan, 2000);
         }
 
