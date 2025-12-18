@@ -1,9 +1,33 @@
 <!DOCTYPE html>
-<html lang="id"><head><link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/></head>
-<body><div class="app-header"><a href="../../index.html" class="header-icon"><i class="fas fa-home"></i></a><h1>PETA SITUASI</h1><div class="header-icon"></div></div>
-<div id="map" style="width:100%; height:calc(100vh - 130px);"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    const map = L.map('map').setView([1.67, 101.45], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-</script></body></html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <title>Peta Sebaran</title>
+</head>
+<body>
+    <div class="app-header">
+        <a href="../../index.html" class="header-icon"><i class="fas fa-home"></i></a>
+        <h1>PETA SITUASI</h1>
+        <div class="header-icon"></div>
+    </div>
+    <div id="map" style="width: 100%; height: calc(100vh - 130px);"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([1.67, 101.45], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        async function loadMarkers() {
+            try {
+                const r = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
+                const d = await r.json();
+                d.laporan.forEach(i => {
+                    const m = i[4].match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
+                    if(m) L.marker([m[1], m[2]]).addTo(map).bindPopup("<b>" + i[1] + "</b><br>" + i[2]);
+                });
+            } catch(e) {}
+        }
+        loadMarkers();
+    </script>
+</body>
+</html>
