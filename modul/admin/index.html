@@ -4,89 +4,116 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Command Center - Garda Dumai Kota</title>
+    <title>Command Center - GARDA DUMAI KOTA</title>
+    <style>
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .bg-wait { background: #ffdada; color: #c0392b; }
+        .bg-pro { background: #fff3cd; color: #856404; }
+        .bg-done { background: #d4edda; color: #155724; }
+        button { cursor: pointer; border: none; padding: 8px 12px; border-radius: 6px; transition: 0.2s; color: white; margin-right: 2px; }
+        button:hover { opacity: 0.8; }
+        .btn-map { background: #3498db; }
+        .btn-pro { background: #f1c40f; color: #333; }
+        .btn-done { background: #2ecc71; }
+        .btn-del { background: #e74c3c; }
+    </style>
 </head>
 <body style="background:#f4f7f6; margin:0; font-family:sans-serif;">
     <div style="background:#1a1a1a; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-        <h1 style="font-size:16px; margin:0;">GARDA DUMAI KOTA | Halo, <span id="admin-nick">Admin</span></h1>
-        <button onclick="localStorage.clear(); location.href='login.html';" style="background:#c0392b; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Keluar</button>
+        <h1 style="font-size:16px; margin:0;">COMMAND CENTER | <span id="userDisplay">-</span></h1>
+        <button onclick="logout()" style="background:#c0392b; border-radius:4px; padding:6px 12px;">Keluar</button>
     </div>
 
     <div style="padding: 20px; max-width: 1200px; margin: auto;">
-        <h2 style="border-bottom:3px solid #1a1a1a; padding-bottom:10px;">LAPORAN MASUK <span id="total-lap" style="float:right; background:#e74c3c; color:white; padding:2px 10px; border-radius:10px;">0</span></h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #1a1a1a; margin-bottom:15px; padding-bottom:10px;">
+            <h2 style="margin:0; font-weight:800;">REKAPITULASI LAPORAN</h2>
+            <div id="countBadge" style="background:#e74c3c; color:white; padding:5px 15px; border-radius:20px; font-weight:bold;">0</div>
+        </div>
         
         <div style="background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow-x: auto;">
-            <table style="width:100%; border-collapse:collapse; min-width:900px;">
+            <table style="width:100%; border-collapse:collapse; min-width:950px;">
                 <thead>
                     <tr style="background:#2c3e50; color:white; text-align:left;">
-                        <th style="padding:15px;">Waktu</th>
-                        <th style="padding:15px;">Kategori/Nama</th>
-                        <th style="padding:15px;">Wilayah & Keterangan</th>
-                        <th style="padding:15px;">Status</th>
-                        <th style="padding:15px;">Aksi</th>
+                        <th style="padding:15px;">WAKTU</th>
+                        <th style="padding:15px;">JENIS & PETUGAS</th>
+                        <th style="padding:15px;">WILAYAH / KETERANGAN</th>
+                        <th style="padding:15px;">STATUS</th>
+                        <th style="padding:15px; text-align:center;">KONTROL AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="table-body"></tbody>
+                <tbody id="laporanBody"></tbody>
             </table>
         </div>
     </div>
 
     <script src="../aksi/auth.js"></script>
     <script>
-        // 1. Satpam Halaman
-        proteksiHalaman('admin');
-        document.getElementById('admin-nick').innerText = localStorage.getItem('user_label');
-
         const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
-        const tbody = document.getElementById('table-body');
+        
+        // 1. Cek Login & Display
+        if(typeof proteksiHalaman === 'function') proteksiHalaman('admin');
+        document.getElementById("userDisplay").innerText = "Halo, " + (localStorage.getItem("user_label") || "ADMIN");
 
-        // 2. Fungsi Ambil Data dari Google Sheets
+        // 2. Fungsi Logout
+        function logout() {
+            if(confirm("Yakin ingin keluar?")) {
+                localStorage.clear();
+                window.location.href = "login.html";
+            }
+        }
+
+        // 3. Fungsi Render Tabel (Tarik Data dari Sheets)
         async function loadLaporan() {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Memuat data...</td></tr>';
+            const tbody = document.getElementById("laporanBody");
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px;">⌛ Sinkronisasi Database SAKTI...</td></tr>';
+
             try {
                 const res = await fetch(SAKTI);
                 const data = await res.json();
-                const laporans = data.laporan;
-                document.getElementById('total-lap').innerText = laporans.length;
-                tbody.innerHTML = '';
+                const items = data.laporan;
+                
+                document.getElementById("countBadge").innerText = items.length;
+                tbody.innerHTML = ""; 
 
-                laporans.reverse().forEach((item, index) => {
-                    const rowId = laporans.length - index;
-                    const status = item[6] || 'Menunggu';
+                items.reverse().forEach((lap, index) => {
+                    const realID = items.length - index; // ID Baris di Google Sheets
+                    const st = lap[6] || "Menunggu";
                     
-                    // Warna badge dinamis
-                    const stColor = status === 'Selesai' ? 'background:#d4edda;color:#155724' : (status === 'Proses' ? 'background:#fff3cd;color:#856404' : 'background:#ffdada;color:#c0392b');
+                    let stClass = "bg-wait";
+                    if(st === "Proses") stClass = "bg-pro";
+                    if(st === "Selesai") stClass = "bg-done";
 
                     tbody.innerHTML += `
-                        <tr>
-                            <td style="padding:15px; border-bottom:1px solid #eee;">${item[0]}</td>
-                            <td style="padding:15px; border-bottom:1px solid #eee;"><b>${item[2]}</b><br><small>${item[1]}</small></td>
-                            <td style="padding:15px; border-bottom:1px solid #eee; font-size:12px;">${item[4]}</td>
-                            <td style="padding:15px; border-bottom:1px solid #eee;"><span style="padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; ${stColor}">${status}</span></td>
-                            <td style="padding:15px; border-bottom:1px solid #eee;">
-                                <button onclick="window.open('${item[3]}','_blank')" style="background:#3498db; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;"><i class="fas fa-map"></i></button>
-                                <button onclick="updateStatus(${rowId}, 'Proses')" style="background:#f1c40f; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;"><i class="fas fa-hard-hat"></i></button>
-                                <button onclick="updateStatus(${rowId}, 'Selesai')" style="background:#2ecc71; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;"><i class="fas fa-check"></i></button>
-                                <button onclick="hapusData(${rowId})" style="background:#e74c3c; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding:15px;"><small>${lap[0]}</small></td>
+                            <td style="padding:15px;"><b>${lap[2]}</b><br><small>${lap[1]}</small></td>
+                            <td style="padding:15px;"><div style="color:#2e7d32; font-weight:bold; font-size:12px;">${lap[4]}</div></td>
+                            <td style="padding:15px;"><span class="badge ${stClass}">${st}</span></td>
+                            <td style="padding:15px; text-align:center;">
+                                <button type="button" class="btn-map" onclick="window.open('${lap[3]}','_blank')" title="Peta"><i class="fas fa-map-marked-alt"></i></button>
+                                <button type="button" class="btn-pro" onclick="updateKeSheets(${realID}, 'Proses')" title="Proses"><i class="fas fa-hard-hat"></i></button>
+                                <button type="button" class="btn-done" onclick="updateKeSheets(${realID}, 'Selesai')" title="Selesai"><i class="fas fa-check-circle"></i></button>
+                                <button type="button" class="btn-del" onclick="hapusDariSheets(${realID})" title="Hapus"><i class="fas fa-trash-alt"></i></button>
                             </td>
                         </tr>`;
                 });
-            } catch (e) { tbody.innerHTML = "Gagal memuat data."; }
+            } catch (e) { tbody.innerHTML = "<tr><td colspan='5'>Gagal muat data database.</td></tr>"; }
         }
 
-        // 3. Fungsi Aksi Ke Google Sheets
-        async function updateStatus(id, st) {
-            if(!confirm("Ubah status ke " + st + "?")) return;
-            await fetch(`${SAKTI}?action=update&id=${id}&status=${st}`, { method: 'POST', mode: 'no-cors' });
-            alert("Status Terupdate!");
-            loadLaporan();
+        // 4. FUNGSI AKSI (Kirim ke Apps Script)
+        async function updateKeSheets(id, status) {
+            if(!confirm("Ubah status baris #" + id + " ke " + status + "?")) return;
+            // Gunakan mode no-cors untuk bypass error CORS Apps Script
+            await fetch(\`\${SAKTI}?action=update&id=\${id}&status=\${status}\`, { method: 'POST', mode: 'no-cors' });
+            alert("✅ Perintah dikirim! Data akan terupdate.");
+            setTimeout(loadLaporan, 2000); // Jeda agar Sheets sempat proses
         }
 
-        async function hapusData(id) {
-            if(!confirm("Hapus permanen laporan ini?")) return;
-            await fetch(`${SAKTI}?action=delete&id=${id}`, { method: 'POST', mode: 'no-cors' });
-            alert("Laporan Terhapus!");
-            loadLaporan();
+        async function hapusDariSheets(id) {
+            if(!confirm("⚠️ Hapus laporan baris #" + id + " secara permanen?")) return;
+            await fetch(\`\${SAKTI}?action=delete&id=\${id}\`, { method: 'POST', mode: 'no-cors' });
+            alert("🗑️ Perintah Hapus dikirim!");
+            setTimeout(loadLaporan, 2000);
         }
 
         window.onload = loadLaporan;
