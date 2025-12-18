@@ -1,104 +1,86 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Garda Dumai Kota</title>
-    <style>
-        body { background: #f4f7f6; margin: 0; padding-bottom: 90px; }
-        .alert-nowcast { background: #b71c1c; color: white; padding: 10px; font-weight: bold; font-size: 13px; display: none; border-bottom: 2px solid yellow; }
-        .marquee-info { background: #ffeb3b; color: #b71c1c; padding: 8px; font-weight: bold; font-size: 12px; }
-    </style>
+    <title>Garda Dumai Modern</title>
 </head>
 <body>
-
-    <div id="box-alert" class="alert-nowcast">
-        <marquee id="msg-alert">⚠️ PERINGATAN DINI BMKG: Memeriksa cuaca ekstrem wilayah Dumai...</marquee>
-    </div>
-
     <div class="app-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="35">
-        <div style="text-align: center;">
-            <div style="font-size: 9px; opacity: 0.8;">PEMERINTAH KOTA DUMAI</div>
-            <div style="font-size: 16px; font-weight: bold;">GARDA DUMAI KOTA</div>
-        </div>
-        <a href="modul/admin/login.html" style="color:white;"><i class="fas fa-user-shield"></i></a>
-    </div>
-
-    <div class="marquee-info">
-        <marquee id="msg-admin">📢 Memuat instruksi Command Center...</marquee>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="30">
+        <h1>GARDA DUMAI</h1>
+        <a href="modul/admin/login.html" class="header-icon"><i class="fas fa-user-circle"></i></a>
     </div>
 
     <div class="container">
-        <div class="card-info" style="display:flex; gap:10px; margin-top:10px;">
-            <div class="box" style="flex:1; background:#0d47a1; color:white; padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:10px;">CUACA DUMAI</div>
-                <div id="w-temp" style="font-size:24px; font-weight:bold;">--°C</div>
-                <div id="w-desc" style="font-size:10px;">MEMUAT...</div>
+        <div style="background: #FFF3E0; color: #E65100; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 15px;">
+            <marquee id="msg-admin">📢 Memuat instruksi terbaru...</marquee>
+        </div>
+
+        <div class="card modern-widget">
+            <div class="widget-icon bg-blue-light"><i class="fas fa-cloud-sun"></i></div>
+            <div class="widget-data" style="flex:1;">
+                <small>Cuaca Dumai Kota</small>
+                <h3 id="w-temp">--°C</h3>
             </div>
-            <div class="box" id="box-gempa" style="flex:1; background:#ef6c00; color:white; padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:10px;">GEMPA BUMI</div>
-                <div id="g-mag" style="font-size:24px; font-weight:bold;">--</div>
-                <div id="g-loc" style="font-size:9px; overflow:hidden;">MEMUAT...</div>
+            <div style="text-align:right;">
+                <div id="w-desc" style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--primary);">...</div>
+                <small style="font-size:10px; opacity:0.6;">BMKG Official</small>
             </div>
         </div>
-        
-        <a href="modul/aksi/index.html" class="btn-main" style="background:#d32f2f; color:white; display:block; text-align:center; padding:18px; border-radius:12px; text-decoration:none; font-weight:bold; margin-top:15px;">AKSI & SOS DARURAT</a>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+             <div class="card modern-widget" style="margin:0; padding: 15px;">
+                <div class="widget-icon" style="background:#FFE0E6; color: var(--danger); width:40px; height:40px; font-size:18px;"><i class="fas fa-clock"></i></div>
+                <div class="widget-data">
+                    <h3 id="st-proses">0</h3>
+                    <small>Proses</small>
+                </div>
+            </div>
+             <div class="card modern-widget" style="margin:0; padding: 15px;">
+                <div class="widget-icon" style="background:#E0F7FA; color: var(--success); width:40px; height:40px; font-size:18px;"><i class="fas fa-check-circle"></i></div>
+                <div class="widget-data">
+                    <h3 id="st-selesai">0</h3>
+                    <small>Selesai</small>
+                </div>
+            </div>
+        </div>
+
+        <a href="modul/aksi/index.html" class="btn-main btn-danger">
+            <i class="fas fa-bolt" style="margin-right:10px;"></i> SOS & DARURAT
+        </a>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
-        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i>Aksi</a>
-        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-edit"></i>Lapor</a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-house-chimney"></i></a>
+        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i></a>
+        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-triangle-exclamation"></i></a>
+        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle" style="font-size:28px; color:var(--primary);"></i></a>
     </nav>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
-
-        async function checkAlerts() {
-            try {
-                // Ambil Index Alert BMKG (Proxy bypass CORS jika perlu, tapi coba fetch langsung dulu)
-                const res = await fetch('https://data.bmkg.go.id/DataMKG/PeringatanDini/peringatan_dini_cuaca_jabodetabek.json'); // BMKG regional
-                const data = await res.json();
-                
-                // Logika: Cari kata "Dumai" di narasi peringatan dini
-                const alertText = data.PeringatanDini.deskripsi;
-                if (alertText.includes("Dumai")) {
-                    document.getElementById('box-alert').style.display = 'block';
-                    document.getElementById('msg-alert').innerText = "🚨 BMKG: " + alertText;
-                }
-            } catch (e) { console.log("Alert check skipped"); }
-        }
+        const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
+        const BMKG_CUACA = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001";
 
         async function syncData() {
             try {
-                // Ambil Cuaca Kelurahan Dumai Kota
-                const wReq = await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001');
+                // Cuaca BMKG
+                const wReq = await fetch(BMKG_CUACA);
                 const wData = await wReq.json();
                 const now = wData.data[0].cuaca[0][0];
                 document.getElementById('w-temp').innerText = now.t + "°C";
                 document.getElementById('w-desc').innerText = now.weather_desc;
 
-                // Ambil Gempa
-                const gReq = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
-                const gData = await gReq.json();
-                const g = gData.Infogempa.gempa;
-                document.getElementById('g-mag').innerText = g.Magnitude + " SR";
-                document.getElementById('g-loc').innerText = g.Wilayah;
-                
-                // Ambil Info Admin
-                const sReq = await fetch(API);
+                // Stats Admin
+                const sReq = await fetch(SAKTI);
                 const sData = await sReq.json();
-                if(sData.info[0]) document.getElementById('msg-admin').innerText = "📢 " + sData.info[0][1];
+                document.getElementById('st-proses').innerText = sData.laporan.filter(i => i[6] !== 'Selesai' && i[6] !== 'Status').length;
+                document.getElementById('st-selesai').innerText = sData.laporan.filter(i => i[6] === 'Selesai').length;
+                if(sData.info && sData.info[0]) document.getElementById('msg-admin').innerText = sData.info[0][1];
             } catch(e) {}
         }
-
-        checkAlerts();
-        syncData();
-        setInterval(syncData, 60000);
+        syncData(); setInterval(syncData, 60000);
     </script>
 </body>
 </html>
