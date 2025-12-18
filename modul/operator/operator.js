@@ -6,14 +6,13 @@ if(!label) window.location.href="../admin/login.html";
 document.getElementById('op-name').innerText = label;
 
 let lat = "", lng = "";
-// Variabel global untuk menyimpan alamat lengkap 3 baris
 let infoJalan = "";
 let infoKel = "";
 let infoKec = "";
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Mengurai Data Lokasi (3 Layer)...";
+    box.innerHTML = "⌛ Analisis 3 Layer Wilayah...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
@@ -21,49 +20,55 @@ async function ambilLokasi() {
         lng = p.coords.longitude;
         
         try {
-            // Tarik data maksimal (Zoom 18) agar dapat semua komponen
+            // Kita tarik data Max Zoom 18 agar Baris 1 (Jalan) tetap dapat datanya.
+            // Untuk Baris 2 & 3 nanti kita filter manual dari objek 'addr'.
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=18&accept-language=id-ID&format=jsonv2`);
             const data = await response.json();
             const addr = data.address;
             
-            // --- PEMETAAN 3 BARIS SESUAI INSTRUKSI BAPAK ---
+            // --- LOGIKA 3 BARIS SESUAI PERMINTAAN ---
 
-            // BARIS 1: Level Jalan (Zoom 18)
-            // Prioritas: Nama Jalan > Nama Gedung > "Jalan tdk terdeteksi"
-            let nmJalan = addr.road || addr.pedestrian || addr.building || "";
+            // BARIS 1: Max Zoom 18 (Deteksi Jalan)
+            // Mengambil entity jalanan
+            let nmJalan = addr.road || addr.pedestrian || addr.path || addr.track || "";
             infoJalan = nmJalan ? `Jln. ${nmJalan}` : "(Jalan tdk terdeteksi)";
 
-            // BARIS 2: Level Kelurahan (Zoom 15)
-            // Prioritas: Village > Suburb > Neighbourhood
-            let nmKel = addr.village || addr.suburb || addr.neighbourhood || "";
-            infoKel = nmKel ? `Kel. ${nmKel}` : "(Kelurahan tdk terdeteksi)";
+            // BARIS 2: Max Zoom 13 (Deteksi Kelurahan)
+            // Sesuai standar OSM Level 13, entity yang muncul hanya: Village, Suburb, Town.
+            // Kita BAIKOT 'neighbourhood', 'quarter', 'hamlet' agar tidak merusak nama kelurahan.
+            let nmKel = addr.village || addr.suburb || addr.town || "";
+            
+            // Fallback darurat: Jika kosong, baru cek neighbourhood (jarang terjadi di Level 13)
+            if(!nmKel) nmKel = "Wilayah Tidak Terdeteksi";
+            
+            infoKel = `Kel. ${nmKel}`;
 
-            // BARIS 3: Level Kecamatan/Kota (Zoom 12)
-            // Prioritas: City District > District > City
+            // BARIS 3: Max Zoom 12 (Deteksi Kecamatan)
+            // Mengambil entity administrasi distrik
             let nmKec = addr.city_district || addr.district || addr.city || "Dumai";
             infoKec = `Kec. ${nmKec}`;
 
-            // TAMPILAN DI UI (3 BARIS RAPI)
+            // TAMPILAN UI (HIJAU STABIL)
             let tampilanHTML = `
                 ✅ TERKUNCI<br>
-                <div style="text-align:left; margin-top:5px; padding-left:10px; border-left:3px solid #2e7d32;">
-                    <div style="font-size:11px; color:#555;">${infoJalan}</div>
-                    <div style="font-size:14px; font-weight:bold; color:#000;">${infoKel}</div>
-                    <div style="font-size:12px; color:#555;">${infoKec}</div>
+                <div style="text-align:left; margin-top:8px; padding-left:12px; border-left:4px solid #2e7d32;">
+                    <div style="font-size:12px; color:#555; margin-bottom:2px;">${infoJalan}</div>
+                    <div style="font-size:16px; font-weight:800; color:#000; text-transform:uppercase; margin-bottom:2px;">${infoKel}</div>
+                    <div style="font-size:13px; color:#333;">${infoKec}</div>
                 </div>
-                <small style="color:#aaa; font-size:9px;">${lat}, ${lng}</small>
+                <small style="color:#aaa; font-size:10px; display:block; margin-top:5px;">${lat}, ${lng}</small>
             `;
             
             box.innerHTML = tampilanHTML;
             box.style.background = "#e8f5e9";
             box.style.color = "#2e7d32";
-            box.style.borderColor = "#2e7d32";
+            box.style.border = "1px solid #c8e6c9";
             
         } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing detail wilayah.</small>";
+            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing detail wilayah (Koneksi).</small>";
         }
     }, (err) => {
-        alert("GPS ERROR: Aktifkan Lokasi!");
+        alert("GPS ERROR: Wajib izinkan lokasi!");
         box.innerText = "❌ GPS Mati";
     }, { enableHighAccuracy: true });
 }
@@ -82,10 +87,12 @@ async function kirimLaporan() {
         let fd = new FormData(); fd.append("image", file);
         let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
         let dataImg = await resImg.json();
+        
+        // Link Maps
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
-        // Gabungkan 3 Baris Info ke dalam satu string keterangan
-        // Format: [Kel. X, Kec. Y | Jln. Z] Keterangan User
+        // FORMAT LAPORAN MASUK DATABASE:
+        // [Kel. X, Kec. Y | Jln. Z] Keterangan User
         const wilayahFull = `[${infoKel}, ${infoKec} | ${infoJalan}]`;
 
         await fetch(SAKTI, {
@@ -100,7 +107,7 @@ async function kirimLaporan() {
             })
         });
 
-        alert("Laporan Terkirim!");
+        alert("Laporan Berhasil Terkirim!");
         window.location.reload();
     } catch(e) {
         alert("Gagal Kirim!");
