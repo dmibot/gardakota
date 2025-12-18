@@ -12,7 +12,7 @@ let infoKec = "";
 
 async function ambilLokasi() {
     const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Menghubungkan Satelit (Dual Layer)...";
+    box.innerHTML = "⌛ Analisis 3 Layer (18/14/12)...";
     box.style.background = "#fff3e0";
 
     navigator.geolocation.getCurrentPosition(async (p) => {
@@ -20,39 +20,27 @@ async function ambilLokasi() {
         lng = p.coords.longitude;
         
         try {
-            // REQUEST 1: ZOOM 18 (Untuk dapat Nama Jalan)
-            // Kita ambil data sedetail mungkin untuk Baris 1
-            const resJalan = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=18&accept-language=id-ID&format=jsonv2`);
-            const dataJalan = await resJalan.json();
+            // Fetch MaxZoom 18 (Agar data Baris 1 tersedia lengkap)
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=18&accept-language=id-ID&format=jsonv2`);
+            const data = await response.json();
+            const addr = data.address;
             
-            // REQUEST 2: ZOOM 14 (PAKSA KELURAHAN)
-            // Kita request ulang dengan Zoom 14 agar Nominatim fokus cari Wilayah (Suburb/Village)
-            const resKel = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&zoom=14&accept-language=id-ID&format=jsonv2`);
-            const dataKel = await resKel.json();
-            
-            // --- PARSING DATA ---
+            // --- LOGIKA PEMETAAN 3 BARIS ---
 
-            // 1. OLAH BARIS 1 (Dari Request Zoom 18)
-            let adj = dataJalan.address;
-            let nmJalan = adj.road || adj.pedestrian || adj.path || "";
+            // BARIS 1: MaxZoom 18 (Detail Jalan)
+            // Mengambil entity fisik jalanan
+            let nmJalan = addr.road || addr.pedestrian || addr.path || addr.track || "";
             infoJalan = nmJalan ? `Jln. ${nmJalan}` : "(Jalan tdk terdeteksi)";
 
-            // 2. OLAH BARIS 2 (Dari Request Zoom 14)
-            // Di Zoom 14, output utama biasanya langsung nama wilayahnya
-            let adk = dataKel.address;
-            
-            // Prioritas: Village > Suburb > Neighbourhood > Quarter > Name (Nama objek itu sendiri)
-            let nmKel = adk.village || adk.suburb || adk.neighbourhood || adk.quarter || dataKel.name || "";
-            
-            // Fallback: Kalau Request 14 kosong, coba intip dari Request 18 tadi
-            if (!nmKel || nmKel == "Dumai") {
-                 nmKel = adj.village || adj.suburb || adj.neighbourhood || "Wilayah tdk terdeteksi";
-            }
-            
+            // BARIS 2: MaxZoom 14 (Detail Wilayah)
+            // Mengambil entity Village, Suburb, Neighbourhood, Quarter
+            let nmKel = addr.village || addr.suburb || addr.neighbourhood || addr.quarter || "";
+            if(!nmKel) nmKel = "Wilayah Tidak Terdeteksi";
             infoKel = `Kel. ${nmKel}`;
 
-            // 3. OLAH BARIS 3 (Kecamatan - Ambil dari Request 14 juga aman)
-            let nmKec = adk.city_district || adk.district || adk.city || "Dumai";
+            // BARIS 3: MaxZoom 12 (Detail Kecamatan/Kota)
+            // Mengambil entity City District, District, City
+            let nmKec = addr.city_district || addr.district || addr.city || "Dumai";
             infoKec = `Kec. ${nmKec}`;
 
             // TAMPILAN UI
@@ -72,7 +60,7 @@ async function ambilLokasi() {
             box.style.border = "1px solid #c8e6c9";
             
         } catch (err) {
-            box.innerHTML = "✅ TERKUNCI<br><small>Koneksi Timeout (Coba lagi).</small>";
+            box.innerHTML = "✅ TERKUNCI<br><small>Gagal parsing data (Koneksi).</small>";
         }
     }, (err) => {
         alert("GPS ERROR: Wajib izinkan lokasi!");
@@ -94,8 +82,10 @@ async function kirimLaporan() {
         let fd = new FormData(); fd.append("image", file);
         let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
         let dataImg = await resImg.json();
+        
         const mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
 
+        // FORMAT DB: [Kel. X, Kec. Y | Jln. Z] Keterangan
         const wilayahFull = `[${infoKel}, ${infoKec} | ${infoJalan}]`;
 
         await fetch(SAKTI, {
