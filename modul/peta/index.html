@@ -4,31 +4,25 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <title>Peta Sebaran</title>
-    <style>#map { width:100%; height:calc(100vh - 130px); }</style>
+    <title>Peta</title>
 </head>
 <body>
     <div class="app-header">
-        <a href="../../index.html" style="color:var(--dark);"><i class="fas fa-arrow-left"></i></a>
-        <h1>PETA SITUASI</h1>
-        <div style="width:20px;"></div>
+        <a href="../../index.html" class="header-btn"><i class="fas fa-home"></i></a>
+        <h1>PETA SEBARAN</h1>
+        <div class="header-btn"></div>
     </div>
-    <div id="map"></div>
+    <div id="map" style="width: 100%; height: calc(100vh - 130px);"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const map = L.map('map').setView([1.67, 101.45], 13);
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-        
-        const base = { "Peta Jalan": osm, "Satelit": sat };
-        L.control.layers(base).addTo(map);
-
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         async function load() {
             const r = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
             const d = await r.json();
             d.laporan.forEach(i => {
                 const m = i[4].match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if(m) L.marker([m[1], m[2]]).addTo(map).bindPopup(`<b>${i[1]}</b><br>${i[2]}<br><small>${i[6]}</small>`);
+                if(m) L.marker([m[1], m[2]]).addTo(map).bindPopup(i[2]);
             });
         }
         load();

@@ -4,34 +4,23 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>SOS Darurat</title>
+    <title>SOS</title>
 </head>
 <body>
     <div class="app-header">
-        <a href="../../index.html" style="color:var(--dark);"><i class="fas fa-arrow-left"></i></a>
+        <a href="../../index.html" class="header-btn"><i class="fas fa-home"></i></a>
         <h1>AKSI DARURAT</h1>
-        <div style="width:20px;"></div>
+        <div class="header-btn"></div>
     </div>
-    <div class="container" style="text-align:center;">
-        <div class="card" style="padding:40px 20px;">
-            <div onclick="callSOS()" style="width:140px; height:140px; background:radial-gradient(#ff5252, #b71c1c); border-radius:50%; margin:auto; display:flex; align-items:center; justify-content:center; color:white; font-size:32px; font-weight:900; box-shadow:0 10px 30px rgba(183,28,28,0.5); border:8px solid rgba(255,255,255,0.2); cursor:pointer;">SOS</div>
-            <p style="margin-top:20px; font-weight:bold; color:#b71c1c;">TEKAN UNTUK SITUASI DARURAT</p>
+    <div class="container" style="text-align: center;">
+        <div class="card" style="padding: 50px 20px;">
+            <a href="https://wa.me/6285172206884?text=🚨 SOS DARURAT!" class="btn-main" style="background:#d32f2f; height: 120px; border-radius: 50%; width: 120px; margin: auto; font-size: 24px;">SOS</a>
         </div>
-        
         <div class="card">
-            <h4 style="margin-bottom:15px;">HUBUNGI PETUGAS</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <a href="tel:112" class="btn-main" style="background:#b71c1c; font-size:12px;">📞 BPBD/112</a>
-                <a href="https://wa.me/6285172206884" class="btn-main" style="background:#2e7d32; font-size:12px;">🟢 WA CAMAT</a>
-            </div>
+            <h4>HUBUNGI PETUGAS</h4>
+            <a href="tel:112" class="btn-main" style="background:#333; margin-bottom: 10px;">PANGGIL 112</a>
+            <a href="https://wa.me/6285172206884" class="btn-main" style="background:#2e7d32;">WHATSAPP CAMAT</a>
         </div>
     </div>
-    <script>
-        function callSOS() {
-            if(confirm("Kirim sinyal SOS ke Command Center?")) {
-                window.location.href = "https://wa.me/6285172206884?text=🚨 *SINYAL SOS DARURAT!*%0AMohon bantuan segera ke lokasi saya!";
-            }
-        }
-    </script>
 </body>
 </html>

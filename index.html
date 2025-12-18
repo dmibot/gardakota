@@ -1,92 +1,48 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Garda Dumai Kota</title>
 </head>
 <body>
-    <div id="alert-cuaca" style="display:none; background:#d32f2f; color:white; padding:10px; font-weight:bold; font-size:12px; border-bottom:3px solid yellow;">
-        <marquee id="msg-cuaca">⚠️ WASPADA: Memeriksa Peringatan Dini BMKG...</marquee>
-    </div>
-
     <div class="app-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="35">
+        <div class="header-btn"></div>
         <h1>GARDA DUMAI KOTA</h1>
-        <a href="modul/admin/login.html" style="color:var(--dark); font-size:20px;"><i class="fas fa-user-shield"></i></a>
+        <a href="modul/admin/login.html" class="header-btn"><i class="fas fa-user-shield"></i></a>
     </div>
-
     <div class="container">
-        <div class="card" style="background: linear-gradient(135deg, #002171, #0d47a1); color: white;">
-            <div style="font-size:11px; text-transform:uppercase; opacity:0.8; font-weight:bold; margin-bottom:5px;">Pengumuman Masyarakat</div>
-            <div id="msg-pengumuman" style="font-size:14px; font-weight:600; line-height:1.4;">
-                📢 Selamat datang di layanan GARDA DUMAI KOTA. Gunakan tombol SOS jika dalam keadaan darurat!
-            </div>
+        <div class="card" style="background: var(--dark); color: white; text-align: center;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="60" style="margin-bottom: 10px;">
+            <div id="msg-pengumuman" style="font-size: 13px; font-weight: 500;">Memuat Info...</div>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-             <div class="card" style="margin:0; border-left:4px solid #ef6c00;">
-                <small style="color:#ef6c00; font-weight:bold; font-size:10px;">INFO GEMPA</small>
-                <h3 id="g-mag" style="margin:5px 0 0 0; font-size:18px;">--</h3>
-                <div id="g-loc" style="font-size:9px; color:#666; overflow:hidden; white-space:nowrap;">Memuat...</div>
-            </div>
-             <div class="card" style="margin:0; border-left:4px solid #0066FF;">
-                <small style="color:#0066FF; font-weight:bold; font-size:10px;">CUACA DUMAI</small>
-                <h3 id="w-temp" style="margin:5px 0 0 0; font-size:18px;">--°C</h3>
-                <div id="w-desc" style="font-size:9px; color:#666;">Memuat...</div>
-            </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="card" style="margin:0;"><small>GEMPA</small><h3 id="g-mag">--</h3><div id="g-loc" style="font-size:9px;">...</div></div>
+            <div class="card" style="margin:0;"><small>CUACA</small><h3 id="w-temp">--°C</h3><div id="w-desc" style="font-size:9px;">...</div></div>
         </div>
-
-        <a href="modul/aksi/index.html" class="btn-main" style="background:#d32f2f; box-shadow: 0 4px 15px rgba(211,47,47,0.4); margin-bottom:15px;">
-            <i class="fas fa-bolt" style="margin-right:10px;"></i> SOS & DARURAT
-        </a>
-        
-        <div class="card">
-            <h4 style="margin:0 0 10px 0; font-size:14px; color:var(--dark);">SITUASI SAAT INI</h4>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:12px; color:#666;">Laporan Diproses</span>
-                <b id="st-proses" style="color:#ef6c00;">0</b>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                <span style="font-size:12px; color:#666;">Laporan Selesai</span>
-                <b id="st-selesai" style="color:#2e7d32;">0</b>
-            </div>
-        </div>
+        <a href="modul/aksi/index.html" class="btn-main" style="background: #d32f2f; margin-top: 15px;"><i class="fas fa-bolt"></i>&nbsp; SOS DARURAT</a>
     </div>
-
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-house"></i></a>
-        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i></a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i></a>
-        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle" style="font-size:24px; color:var(--primary);"></i></a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-house"></i>Home</a>
+        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
+        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i>Darurat</a>
+        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle"></i>Lapor</a>
     </nav>
-
     <script>
-        const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
-        async function fetchBMKG() {
+        async function load() {
             try {
-                // Gempa
-                const gRes = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
-                const g = (await gRes.json()).Infogempa.gempa;
-                document.getElementById('g-mag').innerText = g.Magnitude + " SR";
-                document.getElementById('g-loc').innerText = g.Wilayah;
-
-                // Cuaca Dumai Kota
-                const wRes = await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001');
-                const w = (await wRes.json()).data[0].cuaca[0][0];
-                document.getElementById('w-temp').innerText = w.t + "°C";
-                document.getElementById('w-desc').innerText = w.weather_desc;
-
-                // Stats & Pengumuman
-                const sRes = await fetch(SAKTI);
-                const s = await sRes.json();
-                document.getElementById('st-proses').innerText = s.laporan.filter(i => i[6] !== 'Selesai' && i[6] !== 'Status').length;
-                document.getElementById('st-selesai').innerText = s.laporan.filter(i => i[6] === 'Selesai').length;
-                if(s.info[0]) document.getElementById('msg-pengumuman').innerText = s.info[0][1];
+                const g = await (await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json')).json();
+                document.getElementById('g-mag').innerText = g.Infogempa.gempa.Magnitude + " SR";
+                document.getElementById('g-loc').innerText = g.Infogempa.gempa.Wilayah;
+                const w = await (await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001')).json();
+                document.getElementById('w-temp').innerText = w.data[0].cuaca[0][0].t + "°C";
+                document.getElementById('w-desc').innerText = w.data[0].cuaca[0][0].weather_desc;
+                const s = await (await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec")).json();
+                document.getElementById('msg-pengumuman').innerText = s.info[0][1];
             } catch(e) {}
         }
-        fetchBMKG(); setInterval(fetchBMKG, 60000);
+        load();
     </script>
 </body>
 </html>
