@@ -1,12 +1,47 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><link rel="stylesheet" href="../../css/style.css"><title>Login</title></head>
-<body style="background:#002171; display:flex; align-items:center; height:100vh;">
-    <div class="container"><div class="card" style="text-align:center;"><h3>LOGIN GARDA</h3><input type="text" id="u" placeholder="User"><input type="password" id="p" placeholder="Pass"><button class="btn-main" onclick="auth()">MASUK</button></div></div>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Garda Kota</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; padding: 20px; background: white; }
+        .login-box { width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="https://raw.githubusercontent.com/gardakotaidaman-droid/gardakotaidaman.github.io/main/assets/img/garda-dumaikota.png" style="width:100px; margin-bottom:20px;">
+        <h2 style="margin-bottom:5px;">GARDA DUMAI KOTA</h2>
+        <p style="color:#666; font-size:12px; margin-bottom:30px;">Silakan login untuk akses sistem</p>
+
+        <input type="text" id="user" placeholder="Username (misal: lurah, admin)">
+        <input type="password" id="pass" placeholder="Password">
+        
+        <button class="btn-main" onclick="auth()">MASUK SISTEM</button>
+        <div id="msg" style="margin-top:15px; font-size:12px; color:red;"></div>
+    </div>
+
     <script>
         function auth() {
-            const u = document.getElementById('u').value; const p = document.getElementById('p').value;
-            if(u === "camat" && p === "dksiaga") { localStorage.setItem("role","admin"); localStorage.setItem("user_label","CAMAT"); location.href="index.html"; }
-            else if(p === "pantaudk") { localStorage.setItem("role","operator"); localStorage.setItem("user_label",u.toUpperCase()); location.href="../operator/index.html"; }
-            else alert("Salah!");
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+            const msg = document.getElementById('msg');
+
+            // LOGIKA LOGIN SEDERHANA
+            if(u === 'admin' && p === 'admin123') {
+                localStorage.setItem("role", "admin");
+                localStorage.setItem("user_label", "Admin Command Center");
+                window.location.href = "index.html";
+            } else if (p === 'siap86') { // Password Petugas Lapangan
+                localStorage.setItem("role", "operator");
+                localStorage.setItem("user_label", u.toUpperCase()); // Nama Operator diambil dari username
+                window.location.href = "../operator/index.html";
+            } else {
+                msg.innerText = "Username atau Password Salah!";
+            }
         }
-    </script></body></html>
+    </script>
+</body>
+</html>

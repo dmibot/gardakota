@@ -2,28 +2,64 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Sebaran</title>
     <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Peta Pantau</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        #map { width: 100%; height: calc(100vh - 130px); margin-top: -10px; }
+        .leaflet-control-layers { border-radius: 8px !important; padding: 10px !important; }
+    </style>
 </head>
 <body>
     <div class="app-header">
-        <a href="../../index.html" style="color:white;"><i class="fas fa-home"></i></a>
-        <div style="font-weight:bold;">PETA SEBARAN KEJADIAN</div>
-        <i class="fas fa-sync" onclick="location.reload()"></i>
+        <a href="../../index.html" class="header-icon"><i class="fas fa-arrow-left"></i></a>
+        <h1>PETA SITUASI</h1>
+        <div style="width:20px;"></div>
     </div>
-    
-    <div id="map" style="height:calc(100vh - 135px); width:100%;"></div>
 
-    <nav class="bottom-nav">
-        <a href="../../index.html" class="nav-item"><i class="fas fa-house"></i>Home</a>
-        <a href="index.html" class="nav-item active"><i class="fas fa-map-location-dot"></i>Peta</a>
-        <a href="../aksi/index.html" class="nav-item"><i class="fas fa-bolt"></i>Darurat</a>
-        <a href="../admin/login.html" class="nav-item"><i class="fas fa-user-shield"></i>Petugas</a>
-    </nav>
+    <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="peta.js"></script>
+    <script>
+        const SAKTI = "https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec";
+        
+        // 1. Definisikan Layer Peta
+        const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'OSM'});
+        const satelit = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'Esri'});
+        const hujan = L.tileLayer('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=99db324317112028688849b3803029f6', {attribution:'OpenWeather'});
+        const awan = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=99db324317112028688849b3803029f6', {attribution:'OpenWeather'});
+
+        // 2. Inisialisasi Peta
+        const map = L.map('map', {
+            center: [1.67, 101.45], // Dumai
+            zoom: 13,
+            layers: [streets] // Default Layer
+        });
+
+        // 3. Tambahkan Kontrol Layer (Pojok Kanan Atas)
+        const baseMaps = { "Peta Jalan": streets, "Satelit": satelit };
+        const overlayMaps = { "Curah Hujan": hujan, "Tutupan Awan": awan };
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        // 4. Ambil Data Laporan (Marker)
+        async function loadMarkers() {
+            try {
+                const r = await fetch(SAKTI);
+                const d = await r.json();
+                d.laporan.forEach(i => {
+                    // Regex ambil lat,lng
+                    const m = i[4].match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/); 
+                    if(m) {
+                        const iconColor = i[6] === 'Selesai' ? 'green' : 'red';
+                        // Marker Sederhana
+                        L.marker([m[1], m[2]]).addTo(map)
+                         .bindPopup(`<b>${i[1]}</b><br>${i[2]}<br><small>${i[6]}</small>`);
+                    }
+                });
+            } catch(e) { console.log("Gagal muat marker"); }
+        }
+        loadMarkers();
+    </script>
 </body>
 </html>
