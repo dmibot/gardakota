@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Lapor - Garda Dumai Kota</title>
@@ -24,12 +25,12 @@
             <div id="gps-box" style="padding:15px; background:#f5f5f5; border: 2px dashed #ccc; border-radius:10px; text-align:center; font-size:12px; margin-bottom:10px; font-weight:bold; line-height:1.4;">
                 📍 Silakan Kunci Titik Lokasi
             </div>
-            <button class="btn-main" onclick="ambilLokasi()" style="background:#333; height: 45px;">
+            <button class="btn-main" onclick="ambilLokasi()" style="background:#333; height: 45px; width: 100%; color: white; border: none; border-radius: 8px; cursor: pointer;">
                 <i class="fas fa-crosshairs"></i>&nbsp; KUNCI TITIK GPS
             </button>
             
-            <label>II. JENIS KEJADIAN</label>
-            <select id="kat">
+            <label style="display:block; margin-top:15px;">II. JENIS KEJADIAN</label>
+            <select id="kat" style="width:100%; padding:10px; border-radius:8px; margin-bottom:10px;">
                 <option>🌊 Banjir Rob / Pasang Keling</option>
                 <option>🕳️ Drainase Tersumbat / Banjir</option>
                 <option>🗑️ Penumpukan Sampah</option>
@@ -44,16 +45,22 @@
             </select>
 
             <label>III. DETAIL KETERANGAN</label>
-            <textarea id="ket" rows="3" placeholder="Contoh: Depan gang posyandu..."></textarea>
+            <textarea id="ket" rows="3" placeholder="Contoh: Depan gang posyandu..." style="width:100%; padding:10px; border-radius:8px; box-sizing:border-box;"></textarea>
 
-            <label>IV. FOTO BUKTI</label>
-            <input type="file" id="foto" accept="image/*" capture="camera">
+            <label style="display:block; margin-top:15px;">IV. FOTO BUKTI</label>
+            <input type="file" id="foto" accept="image/*" capture="camera" style="width:100%; margin-bottom:10px;">
 
-            <button class="btn-main" id="btnLapor" onclick="kirimLaporan()" style="margin-top:20px;">
+            <button class="btn-main" id="btnLapor" onclick="kirimLaporan()" style="margin-top:20px; width: 100%; padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                 <i class="fas fa-paper-plane"></i>&nbsp; KIRIM KE DASHBOARD
             </button>
         </div>
     </div>
+
+    <script src="../aksi/auth.js"></script>
+    <script>
+        if(typeof proteksiHalaman === 'function') proteksiHalaman('operator');
+        document.getElementById('op-name').innerText = localStorage.getItem("user_label") || "PETUGAS";
+    </script>
     <script src="operator.js"></script>
 </body>
 </html>
