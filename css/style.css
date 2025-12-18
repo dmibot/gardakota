@@ -1,44 +1,50 @@
 :root { 
-    --primary: #0d47a1; 
-    --primary-dark: #002171; 
-    --accent: #d32f2f; 
-    --bg: #f0f2f5; 
-    --glass: rgba(255, 255, 255, 0.9);
+    --primary: #002171; --primary-light: #0d47a1; 
+    --accent: #d32f2f; --bg: #f4f7f6; 
+    --h-height: 65px; --nav-height: 70px; 
 }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: #1c1e21; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    margin: 0; background: var(--bg); 
+    padding-top: var(--h-height); padding-bottom: var(--nav-height); 
+    font-size: 14px; color: #333; overflow-x: hidden;
+}
 
-/* Poles Header: Lebih Kokoh */
+/* HEADER KONSTAN (FIXED) */
 .app-header { 
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    padding: 20px 15px;
-    border-bottom: 3px solid #ffeb3b; /* Garis Kuning Khas Melayu/Pemerintah */
+    height: var(--h-height); background: var(--primary); color: white; 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 0 15px; position: fixed; top: 0; width: 100%; z-index: 2000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom: 3px solid #ffeb3b;
 }
+.app-header h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
 
-/* Poles Card: Efek Melayang & Kaca */
+/* CONTAINER KONSTAN */
+.container { padding: 12px; max-width: 500px; margin: auto; }
+
+/* CARD & TOMBOL SERAGAM */
 .card { 
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid rgba(13, 71, 161, 0.05);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-    transition: transform 0.2s ease;
+    background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;
 }
-.card:active { transform: scale(0.98); }
-
-/* Poles Tombol: Efek Tekan Premium */
 .btn-main { 
-    border-radius: 15px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-size: 14px;
-    box-shadow: 0 4px 15px rgba(13, 71, 161, 0.3);
+    height: 48px; display: flex; align-items: center; justify-content: center;
+    background: var(--primary); color: white; border: none; border-radius: 10px;
+    width: 100%; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none;
+    transition: 0.2s;
 }
+.btn-main:active { transform: scale(0.98); opacity: 0.9; }
 
-/* Poles Bottom Nav: Lebih Futuristik */
+/* BOTTOM NAV KONSTAN */
 .bottom-nav { 
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(15px);
-    border-top: 1px solid rgba(0,0,0,0.05);
-    padding: 10px 0 25px 0; /* Padding bawah lebih besar untuk iPhone/Android baru */
+    height: var(--nav-height); position: fixed; bottom: 0; width: 100%; 
+    background: white; display: flex; border-top: 1px solid #eee; z-index: 2000;
+    padding-bottom: env(safe-area-inset-bottom);
 }
+.nav-item { 
+    flex: 1; display: flex; flex-direction: column; align-items: center; 
+    justify-content: center; color: #888; text-decoration: none; font-size: 10px;
+}
+.nav-item i { font-size: 20px; margin-bottom: 4px; }
+.nav-item.active { color: var(--primary); font-weight: bold; }

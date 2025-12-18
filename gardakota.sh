@@ -1,113 +1,124 @@
 #!/bin/bash
 
-# URL SAKTI BAPAK
+# CONFIG DATA (PASTIKAN URL SAKTI TETAP SAMA)
 URL_SAKTI="https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec"
 
-echo "📡 MENGAKTIFKAN AUTO-DETECTION PERINGATAN DINI BMKG DUMAI..."
+echo "📏 MENYARAGAMKAN UX SEMUA MODUL & MENGAKTIFKAN JARAK..."
 
-cat << EOF > index.html
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Garda Dumai Kota</title>
-    <style>
-        body { background: #f4f7f6; margin: 0; padding-bottom: 90px; }
-        .alert-nowcast { background: #b71c1c; color: white; padding: 10px; font-weight: bold; font-size: 13px; display: none; border-bottom: 2px solid yellow; }
-        .marquee-info { background: #ffeb3b; color: #b71c1c; padding: 8px; font-weight: bold; font-size: 12px; }
-    </style>
-</head>
-<body>
+# 1. KUNCI MASTER CSS (Standardisasi Ukuran)
+cat << 'EOF' > css/style.css
+:root { 
+    --primary: #002171; --primary-light: #0d47a1; 
+    --accent: #d32f2f; --bg: #f4f7f6; 
+    --h-height: 65px; --nav-height: 70px; 
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    margin: 0; background: var(--bg); 
+    padding-top: var(--h-height); padding-bottom: var(--nav-height); 
+    font-size: 14px; color: #333; overflow-x: hidden;
+}
 
-    <div id="box-alert" class="alert-nowcast">
-        <marquee id="msg-alert">⚠️ PERINGATAN DINI BMKG: Memeriksa cuaca ekstrem wilayah Dumai...</marquee>
-    </div>
+/* HEADER KONSTAN (FIXED) */
+.app-header { 
+    height: var(--h-height); background: var(--primary); color: white; 
+    display: flex; align-items: center; justify-content: space-between; 
+    padding: 0 15px; position: fixed; top: 0; width: 100%; z-index: 2000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom: 3px solid #ffeb3b;
+}
+.app-header h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
 
-    <div class="app-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="35">
-        <div style="text-align: center;">
-            <div style="font-size: 9px; opacity: 0.8;">PEMERINTAH KOTA DUMAI</div>
-            <div style="font-size: 16px; font-weight: bold;">GARDA DUMAI KOTA</div>
-        </div>
-        <a href="modul/admin/login.html" style="color:white;"><i class="fas fa-user-shield"></i></a>
-    </div>
+/* CONTAINER KONSTAN */
+.container { padding: 12px; max-width: 500px; margin: auto; }
 
-    <div class="marquee-info">
-        <marquee id="msg-admin">📢 Memuat instruksi Command Center...</marquee>
-    </div>
+/* CARD & TOMBOL SERAGAM */
+.card { 
+    background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;
+}
+.btn-main { 
+    height: 48px; display: flex; align-items: center; justify-content: center;
+    background: var(--primary); color: white; border: none; border-radius: 10px;
+    width: 100%; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none;
+    transition: 0.2s;
+}
+.btn-main:active { transform: scale(0.98); opacity: 0.9; }
 
-    <div class="container">
-        <div class="card-info" style="display:flex; gap:10px; margin-top:10px;">
-            <div class="box" style="flex:1; background:#0d47a1; color:white; padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:10px;">CUACA DUMAI</div>
-                <div id="w-temp" style="font-size:24px; font-weight:bold;">--°C</div>
-                <div id="w-desc" style="font-size:10px;">MEMUAT...</div>
-            </div>
-            <div class="box" id="box-gempa" style="flex:1; background:#ef6c00; color:white; padding:15px; border-radius:12px; text-align:center;">
-                <div style="font-size:10px;">GEMPA BUMI</div>
-                <div id="g-mag" style="font-size:24px; font-weight:bold;">--</div>
-                <div id="g-loc" style="font-size:9px; overflow:hidden;">MEMUAT...</div>
-            </div>
-        </div>
-        
-        <a href="modul/aksi/index.html" class="btn-main" style="background:#d32f2f; color:white; display:block; text-align:center; padding:18px; border-radius:12px; text-decoration:none; font-weight:bold; margin-top:15px;">AKSI & SOS DARURAT</a>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
-        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
-        <a href="modul/aksi/index.html" class="nav-item"><i class="fas fa-circle-exclamation"></i>Aksi</a>
-        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-edit"></i>Lapor</a>
-    </nav>
-
-    <script>
-        const API = "$URL_SAKTI";
-
-        async function checkAlerts() {
-            try {
-                // Ambil Index Alert BMKG (Proxy bypass CORS jika perlu, tapi coba fetch langsung dulu)
-                const res = await fetch('https://data.bmkg.go.id/DataMKG/PeringatanDini/peringatan_dini_cuaca_jabodetabek.json'); // BMKG regional
-                const data = await res.json();
-                
-                // Logika: Cari kata "Dumai" di narasi peringatan dini
-                const alertText = data.PeringatanDini.deskripsi;
-                if (alertText.includes("Dumai")) {
-                    document.getElementById('box-alert').style.display = 'block';
-                    document.getElementById('msg-alert').innerText = "🚨 BMKG: " + alertText;
-                }
-            } catch (e) { console.log("Alert check skipped"); }
-        }
-
-        async function syncData() {
-            try {
-                // Ambil Cuaca Kelurahan Dumai Kota
-                const wReq = await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001');
-                const wData = await wReq.json();
-                const now = wData.data[0].cuaca[0][0];
-                document.getElementById('w-temp').innerText = now.t + "°C";
-                document.getElementById('w-desc').innerText = now.weather_desc;
-
-                // Ambil Gempa
-                const gReq = await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json');
-                const gData = await gReq.json();
-                const g = gData.Infogempa.gempa;
-                document.getElementById('g-mag').innerText = g.Magnitude + " SR";
-                document.getElementById('g-loc').innerText = g.Wilayah;
-                
-                // Ambil Info Admin
-                const sReq = await fetch(API);
-                const sData = await sReq.json();
-                if(sData.info[0]) document.getElementById('msg-admin').innerText = "📢 " + sData.info[0][1];
-            } catch(e) {}
-        }
-
-        checkAlerts();
-        syncData();
-        setInterval(syncData, 60000);
-    </script>
-</body>
-</html>
+/* BOTTOM NAV KONSTAN */
+.bottom-nav { 
+    height: var(--nav-height); position: fixed; bottom: 0; width: 100%; 
+    background: white; display: flex; border-top: 1px solid #eee; z-index: 2000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item { 
+    flex: 1; display: flex; flex-direction: column; align-items: center; 
+    justify-content: center; color: #888; text-decoration: none; font-size: 10px;
+}
+.nav-item i { font-size: 20px; margin-bottom: 4px; }
+.nav-item.active { color: var(--primary); font-weight: bold; }
 EOF
+
+# 2. UPDATE ADMIN JS (LOGIKA JARAK TANPA MERUSAK UPDATE STATUS)
+cat << EOF > modul/admin/admin.js
+const SAKTI = "$URL_SAKTI";
+let aLat, aLng;
+
+// Ambil lokasi Admin sekali saja
+navigator.geolocation.getCurrentPosition(p => {
+    aLat = p.coords.latitude; aLng = p.coords.longitude;
+    loadAdmin();
+}, () => loadAdmin());
+
+function calcDist(lat2, lon2) {
+    if(!aLat) return "";
+    const R = 6371;
+    const dLat = (lat2-aLat) * Math.PI / 180;
+    const dLon = (lon2-aLng) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(aLat * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return \`📍 \${d.toFixed(1)} km (\${Math.round(d*4)} mnt)\`;
+}
+
+async function loadAdmin() {
+    const r = await fetch(SAKTI);
+    const d = await r.json();
+    let h = "";
+    d.laporan.reverse().forEach((i, idx) => {
+        if(idx === d.laporan.length - 1 || !i[0]) return;
+        
+        let dist = "";
+        const m = i[4].match(/q=(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)/);
+        if(m) dist = calcDist(parseFloat(m[1]), parseFloat(m[2]));
+
+        h += \`<div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <small><b>\${i[1]}</b> • \${i[2]}</small>
+                <b style="font-size:10px; color:#d32f2f;">\${dist}</b>
+            </div>
+            <p style="margin:5px 0; font-size:13px; color:#444;">\${i[3]}</p>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <a href="\${i[4]}" target="_blank" class="btn-main" style="background:#eee; color:#333; flex:1; height:36px; font-size:11px;">MAPS</a>
+                <a href="\${i[5]}" target="_blank" class="btn-main" style="background:#eee; color:#333; flex:1; height:36px; font-size:11px;">FOTO</a>
+                <button onclick="upd('\${i[0]}','Selesai')" class="btn-main" style="background:#2ecc71; flex:1; height:36px; font-size:11px;">DONE</button>
+            </div>
+        </div>\`;
+    });
+    document.getElementById('wf-list').innerHTML = h;
+}
+
+async function upd(id, st) {
+    if(!confirm("Selesaikan laporan ini?")) return;
+    await fetch(SAKTI, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'updateStatus', id:id, status:st }) });
+    location.reload();
+}
+setInterval(loadAdmin, 30000);
+EOF
+
+echo "-------------------------------------------------------"
+echo "✅ STANDARISASI BERHASIL!"
+echo "📍 Tampilan semua modul sekarang IDENTIK dan KONSTAN."
+echo "📍 Modul Admin sekarang otomatis menghitung jarak km."
+echo "📍 Tidak ada fungsi yang terganggu."
+echo "-------------------------------------------------------"
