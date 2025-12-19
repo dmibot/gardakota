@@ -1,67 +1,55 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Aplikasi Garda Kota Idaman - Dumai Kota, Riau">
-
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0d6efd">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GardaKota">
-
-    <title>Garda Kota Idaman</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-
-    <!-- Icons -->
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
-    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
-
-    <!-- CSS -->
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Garda Dumai Kota</title>
 </head>
 <body>
-    <header>
-        <h1>Garda Kota Idaman</h1>
-        <p>Dumai Kota - Riau</p>
-    </header>
-
-    <main>
-        <nav>
-            <a href="#" data-module="home">Home</a>
-            <a href="#" data-module="berita">Berita</a>
-            <a href="#" data-module="galeri">Galeri</a>
-            <a href="#" data-module="kontak">Kontak</a>
-        </nav>
-
-        <section id="content">
-            <!-- Dynamic content loaded here -->
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Garda Kota Idaman. All rights reserved.</p>
-    </footer>
-
-    <!-- Module Loader -->
-    <script src="modul/loader.js"></script>
-
-    <!-- Service Worker Registration -->
+    <div class="app-header">
+        <div class="header-icon"></div>
+        <h1>GARDA DUMAI KOTA</h1>
+        <a href="modul/admin/login.html" class="header-icon"><i class="fas fa-user-shield"></i></a>
+    </div>
+    <div class="container">
+        <div class="card" style="background: var(--dark); color: white; text-align: center; border-bottom: 4px solid var(--gold);">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="55">
+            <div id="msg-info" style="font-size: 13px; margin-top: 10px; font-weight: 600;">📡 Menghubungkan Command Center...</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="card" style="margin:0; border-left: 4px solid #ef6c00;">
+                <small style="color:#ef6c00; font-weight:800;">MAGNITUDE</small>
+                <h3 id="g-mag" style="margin:5px 0;">--</h3>
+                <div id="g-loc" style="font-size:9px; color:#666;">Memuat Gempa...</div>
+            </div>
+            <div class="card" style="margin:0; border-left: 4px solid var(--primary);">
+                <small style="color:var(--primary); font-weight:800;">SUHU</small>
+                <h3 id="w-temp" style="margin:5px 0;">--°C</h3>
+                <div id="w-desc" style="font-size:9px; color:#666;">Memuat Cuaca...</div>
+            </div>
+        </div>
+        <a href="modul/aksi/index.html" class="btn-main btn-danger" style="margin-top: 15px;"><i class="fas fa-bolt"></i>&nbsp; SOS DARURAT</a>
+    </div>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><i class="fas fa-house"></i>Home</a>
+        <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
+        <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle"></i>Lapor</a>
+    </nav>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('✅ Service Worker registered:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('❌ Service Worker registration failed:', error);
-                    });
-            });
+        async function load() {
+            try {
+                const g = await (await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json')).json();
+                document.getElementById('g-mag').innerText = g.Infogempa.gempa.Magnitude + " SR";
+                document.getElementById('g-loc').innerText = g.Infogempa.gempa.Wilayah;
+                const w = await (await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001')).json();
+                document.getElementById('w-temp').innerText = w.data[0].cuaca[0][0].t + "°C";
+                document.getElementById('w-desc').innerText = w.data[0].cuaca[0][0].weather_desc;
+                const s = await (await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec")).json();
+                if(s.info[0]) document.getElementById('msg-info').innerText = s.info[0][1];
+            } catch(e) {}
         }
+        load();
     </script>
 </body>
 </html>
