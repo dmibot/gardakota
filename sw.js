@@ -1,3 +1,14 @@
-const CACHE = 'garda-v1';
-self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/', '/index.html', '/css/style.css']))));
-self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+// sw.js di root
+self.addEventListener('install', event => {
+  // Bisa tambahkan pre-cache di sini kalau perlu
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+  // Untuk awal cukup biarkan lewat begitu saja
+  return;
+});
