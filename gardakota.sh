@@ -1,92 +1,68 @@
 #!/bin/bash
 
-# CONFIG DATA
-URL_SAKTI="https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec"
-IMGBB_KEY="2e07237050e6690770451ded20f761b5"
+# ====== SETTING AWAL ======
+# default remote & branch (kalau mau dipaksa ke main, isi ORIGIN_BRANCH="main")
+ORIGIN_NAME="origin"
+ORIGIN_BRANCH=""
 
-echo "🔧 Memperbaiki Pemisahan Data Lokasi & Keterangan..."
+# ====== CEK GIT REPO ======
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+  echo "Bukan folder git. Jalankan script ini di dalam repo gardakotaidaman.github.io"
+  exit 1
+fi
 
-cat << EOF > modul/operator/operator.js
-const SAKTI = "$URL_SAKTI";
-const IMGBB = "$IMGBB_KEY";
-const label = localStorage.getItem("user_label");
+# ====== HAPUS FILE SAMPAH (.DS_Store) ======
+echo "Menghapus file .DS_Store..."
+find . -name ".DS_Store" -type f -delete
 
-if(!label) window.location.href="../admin/login.html";
-document.getElementById('op-name').innerText = label;
+# Pastikan .DS_Store di-ignore ke depan
+if ! grep -q ".DS_Store" .gitignore 2>/dev/null; then
+  echo ".DS_Store" >> .gitignore
+fi
 
-let lat = "", lng = "";
-let infoJalan = "", infoKel = "", infoKec = "";
+# ====== TAMPILKAN STATUS ======
+echo
+echo "Status git sebelum commit:"
+git status
 
-async function ambilLokasi() {
-    const box = document.getElementById('gps-box');
-    box.innerHTML = "⌛ Mengunci Satelit...";
-    box.style.background = "#fff3e0";
+# ====== INPUT PESAN COMMIT ======
+echo
+read -p "Isi pesan commit (kosongkan untuk auto timestamp): " COMMIT_MSG
 
-    navigator.geolocation.getCurrentPosition(async (p) => {
-        lat = p.coords.latitude; 
-        lng = p.coords.longitude;
-        
-        try {
-            // Triple Fetch Logic (18, 14, 12)
-            const r1 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=18&accept-language=id-ID&format=jsonv2\`);
-            const d1 = await r1.json();
-            const r2 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=14&accept-language=id-ID&format=jsonv2\`);
-            const d2 = await r2.json();
-            const r3 = await fetch(\`https://nominatim.openstreetmap.org/reverse?lat=\${lat}&lon=\${lng}&zoom=12&accept-language=id-ID&format=jsonv2\`);
-            const d3 = await r3.json();
+if [ -z "$COMMIT_MSG" ]; then
+  COMMIT_MSG="Auto-sync: $(date '+%Y-%m-%d %H:%M:%S')"
+fi
 
-            infoJalan = d1.address.road || d1.address.pedestrian || "Jln. Tidak Terdeteksi";
-            infoKel = d2.address.village || d2.address.suburb || d2.address.neighbourhood || "Kelurahan";
-            infoKec = d3.address.city_district || d3.address.district || "Kecamatan";
+# ====== ADD & COMMIT ======
+echo
+echo "Menjalankan git add ."
+git add .
 
-            box.innerHTML = \`✅ TERKUNCI<br><div style="text-align:left; font-size:12px; margin-top:5px; padding-left:10px; border-left:3px solid green;">\${infoJalan}<br><b>Kel. \${infoKel}</b><br>\${infoKec}</div>\`;
-            box.style.background = "#e8f5e9";
-        } catch (e) { box.innerHTML = "✅ TERKUNCI (GPS OK)"; }
-    }, (err) => { alert("Wajib Aktifkan GPS!"); }, { enableHighAccuracy: true });
-}
+# Cek apakah ada perubahan yang benar‑benar perlu di-commit
+if git diff --cached --quiet; then
+  echo "Tidak ada perubahan untuk di-commit. Selesai."
+  exit 0
+fi
 
-async function kirimLaporan() {
-    const file = document.getElementById('foto').files[0];
-    const kat = document.getElementById('kat').value;
-    const ket = document.getElementById('ket').value;
-    const btn = document.getElementById('btnLapor');
+echo "Menjalankan git commit -m \"$COMMIT_MSG\""
+git commit -m "$COMMIT_MSG"
 
-    if(!lat || !file) return alert("Kunci GPS & Ambil Foto!");
-    btn.innerText = "⏳ MENGIRIM...";
-    btn.disabled = true;
+# ====== TENTUKAN BRANCH ======
+if [ -z "$ORIGIN_BRANCH" ]; then
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+else
+  CURRENT_BRANCH="$ORIGIN_BRANCH"
+fi
 
-    try {
-        let fd = new FormData(); fd.append("image", file);
-        let resImg = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB, {method:"POST", body:fd});
-        let dImg = await resImg.json();
+# ====== PULL (REBASE) SEBELUM PUSH ======
+echo
+echo "Menjalankan git pull --rebase $ORIGIN_NAME $CURRENT_BRANCH"
+git pull --rebase "$ORIGIN_NAME" "$CURRENT_BRANCH"
 
-        // --- PERBAIKAN DI SINI ---
-        // 1. Link Maps MURNI (Hanya lat & lon)
-        const mapsUrl = \`https://www.google.com/maps?q=\${lat},\${lng}\`;
+# ====== PUSH ======
+echo
+echo "Menjalankan git push $ORIGIN_NAME $CURRENT_BRANCH"
+git push "$ORIGIN_NAME" "$CURRENT_BRANCH"
 
-        // 2. Keterangan GABUNGAN (Wilayah + Deskripsi)
-        const keteranganLengkap = \`[Kel. \${infoKel}, \${infoKec} | \${infoJalan}] \${ket}\`;
-
-        await fetch(SAKTI, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({
-                nama: label,
-                kategori: kat,
-                keterangan: keteranganLengkap,
-                lokasi: mapsUrl, // Sekarang isinya link maps asli
-                foto: dImg.data.url
-            })
-        });
-
-        alert("Laporan Terkirim!");
-        window.location.reload();
-    } catch(e) {
-        alert("Gagal Kirim!");
-        btn.innerText = "KIRIM KE DASHBOARD";
-        btn.disabled = false;
-    }
-}
-EOF
-
-echo "✅ Berhasil. Sekarang data Lokasi dan Keterangan sudah terpisah dengan benar."
+echo
+echo "Selesai. Perubahan sudah di-push ke $ORIGIN_NAME/$CURRENT_BRANCH"
