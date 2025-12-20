@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- PWA meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Meta Tags -->
     <meta name="description" content="Command Center Garda Dumai Kota - Monitoring Gempa, Cuaca & SOS Darurat">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GardaKota">
-
-    <!-- Manifest & Icons -->
+    
+    <title>Garda Dumai Kota</title>
+    
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="assets/img/icon-192.png">
-
+    
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <title>Garda Dumai Kota</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="app-header">
@@ -27,11 +27,13 @@
         <h1>GARDA DUMAI KOTA</h1>
         <a href="modul/admin/login.html" class="header-icon"><i class="fas fa-user-shield"></i></a>
     </div>
+    
     <div class="container">
         <div class="card" style="background: var(--dark); color: white; text-align: center; border-bottom: 4px solid var(--gold);">
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Logo_Kota_Dumai.png" width="55">
             <div id="msg-info" style="font-size: 13px; margin-top: 10px; font-weight: 600;">📡 Menghubungkan Command Center...</div>
         </div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="card" style="margin:0; border-left: 4px solid #ef6c00;">
                 <small style="color:#ef6c00; font-weight:800;">MAGNITUDE</small>
@@ -44,16 +46,18 @@
                 <div id="w-desc" style="font-size:9px; color:#666;">Memuat Cuaca...</div>
             </div>
         </div>
+        
         <a href="modul/aksi/index.html" class="btn-main btn-danger" style="margin-top: 15px;">
             <i class="fas fa-bolt"></i>&nbsp; SOS DARURAT
         </a>
     </div>
+    
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active"><i class="fas fa-house"></i>Home</a>
         <a href="modul/peta/index.html" class="nav-item"><i class="fas fa-map-location-dot"></i>Peta</a>
         <a href="modul/operator/index.html" class="nav-item"><i class="fas fa-plus-circle"></i>Lapor</a>
     </nav>
-
+    
     <!-- Command Center Data Loader -->
     <script>
         async function load() {
@@ -61,27 +65,27 @@
                 const g = await (await fetch('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json')).json();
                 document.getElementById('g-mag').innerText = g.Infogempa.gempa.Magnitude + " SR";
                 document.getElementById('g-loc').innerText = g.Infogempa.gempa.Wilayah;
-
+                
                 const w = await (await fetch('https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=14.72.06.1001')).json();
                 document.getElementById('w-temp').innerText = w.data[0].cuaca[0][0].t + "°C";
                 document.getElementById('w-desc').innerText = w.data[0].cuaca[0][0].weather_desc;
-
+                
                 const s = await (await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec")).json();
-                if (s.info[0]) document.getElementById('msg-info').innerText = s.info[0][1];
+                if(s.info[0]) document.getElementById('msg-info').innerText = s.info[0][1];
             } catch(e) {
-                console.error(e);
+                console.error('Error loading data:', e);
             }
         }
         load();
     </script>
-
-    <!-- Service Worker Registration -->
+    
+    <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-                    .catch(err => console.error('❌ Service Worker registration failed:', err));
+                    .then(reg => console.log('✅ Service Worker registered'))
+                    .catch(err => console.error('❌ Service Worker failed:', err));
             });
         }
     </script>
