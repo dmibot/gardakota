@@ -3,473 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peta Sebaran Laporan - Garda Dumai Kota</title>
-    
-    <!-- Leaflet CSS -->
+    <title>Peta Sebaran Laporan</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
     <style>
-        * { box-sizing: border-box; }
-        
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        
-        #map {
-            height: 100vh;
-            width: 100%;
-            position: relative;
-        }
-        
-        .map-container {
-            position: relative;
-            height: 100vh;
-        }
-        
-        /* Header */
-        .peta-header {
+        body { margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
+        #map { height: 100vh; width: 100%; z-index: 1; }
+
+        /* Floating Button untuk Buka/Tutup Filter */
+        .toggle-btn {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 999;
-            max-width: 400px;
-        }
-        
-        .peta-header h3 {
-            margin: 0 0 12px 0;
-            font-size: 16px;
-            color: #333;
-        }
-        
-        .filter-group {
-            margin-bottom: 12px;
-        }
-        
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #666;
-            display: block;
-            margin-bottom: 6px;
-        }
-        
-        .filter-group select,
-        .filter-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: inherit;
-        }
-        
-        .filter-group select:focus,
-        .filter-group input:focus {
-            outline: none;
-            border-color: #2180a8;
-            box-shadow: 0 0 0 2px rgba(33, 128, 141, 0.1);
-        }
-        
-        /* Statistics */
-        .peta-stats {
-            position: absolute;
-            bottom: 20px;
-            left: 10px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 999;
-            max-width: 350px;
-            font-size: 13px;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-        
-        .stat-label { color: #666; font-weight: 500; }
-        .stat-value { font-weight: 700; color: #2180a8; }
-        
-        /* Legend */
-        .peta-legend {
-            position: absolute;
-            bottom: 20px;
-            right: 10px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 999;
-            max-width: 200px;
-            font-size: 12px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .legend-item:last-child { margin-bottom: 0; }
-        
-        .legend-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
-        
-        /* Popup Custom */
-        .leaflet-popup-content {
-            width: auto !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .popup-card {
-            padding: 12px;
-            min-width: 250px;
-        }
-        
-        .popup-header {
-            font-weight: 700;
-            color: #2180a8;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-        
-        .popup-info {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 6px;
-        }
-        
-        .popup-info strong {
-            color: #333;
-        }
-        
-        .popup-foto {
-            margin-top: 10px;
-        }
-        
-        .popup-foto img {
-            max-width: 100%;
-            max-height: 150px;
-            border-radius: 4px;
-        }
-        
-        .popup-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 6px 12px;
+            top: 10px; left: 10px;
+            z-index: 1000;
             background: #2180a8;
             color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        
+
+        /* Panel Filter (Hidden by default on mobile, or collapsible) */
+        .filter-panel {
+            position: absolute;
+            top: 60px; left: 10px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 999;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform-origin: top left;
+        }
+
+        /* Class untuk hide panel */
+        .panel-hidden {
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .filter-group { margin-bottom: 10px; }
+        .filter-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #555; }
+        .filter-group select, .filter-group input {
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;
+        }
+
+        /* Stats Bar (Bawah) */
+        .stats-bar {
+            position: absolute;
+            bottom: 20px; left: 10px;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            gap: 15px;
+        }
+        .stats-item span { color: #2180a8; }
+
+        /* Legend (Kanan Bawah) */
+        .legend {
+            position: absolute;
+            bottom: 20px; right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; display: inline-block; }
+
         /* Loading */
         .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            z-index: 1000;
-            text-align: center;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7); color: white; padding: 15px 25px;
+            border-radius: 8px; z-index: 2000; font-size: 14px;
         }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #ddd;
-            border-top-color: #2180a8;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 10px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 768px) {
-            .peta-header {
-                max-width: 100%;
-                left: 5px;
-                right: 5px;
-                top: 5px;
-            }
-            
-            .peta-stats {
-                max-width: 100%;
-                left: 5px;
-            }
-            
-            .peta-legend {
-                max-width: 100%;
-                left: 5px;
-                right: 5px;
-                bottom: auto;
-                top: 350px;
-            }
-        }
+
+        /* Popup Styles */
+        .popup-content { width: 200px; }
+        .popup-row { margin-bottom: 5px; font-size: 12px; line-height: 1.4; }
+        .popup-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-top: 5px; background: #eee; }
+        .btn-maps { display: block; background: #2180a8; color: white; text-align: center; padding: 6px; margin-top: 8px; border-radius: 4px; text-decoration: none; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div class="map-container">
-        <div id="map"></div>
-        
-        <div class="peta-header">
-            <h3><i class="fas fa-map-location-dot"></i> Filter Laporan</h3>
-            
-            <div class="filter-group">
-                <label>📅 Minggu</label>
-                <select id="filterWeek">
-                    <option value="all">Semua Minggu</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label>📋 Kategori</label>
-                <select id="filterKategori">
-                    <option value="all">Semua Kategori</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label>🔍 Cari Lokasi</label>
-                <input type="text" id="searchLokasi" placeholder="Ketik nama jalan..." />
-            </div>
+
+    <div id="map"></div>
+
+    <!-- 1. Tombol Toggle (Biar ga menuhin layar) -->
+    <button class="toggle-btn" onclick="togglePanel()">
+        <i class="fas fa-filter"></i> Filter & Cari
+    </button>
+
+    <!-- 2. Panel Filter (Bisa disembunyikan) -->
+    <div class="filter-panel panel-hidden" id="panel">
+        <div class="filter-group">
+            <label>📅 PERIODE MINGGU</label>
+            <select id="fWeek">
+                <option value="all">Semua Data</option>
+            </select>
         </div>
-        
-        <div class="peta-stats">
-            <div class="stat-item">
-                <span class="stat-label">Total</span>
-                <span class="stat-value" id="totalLaporan">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Minggu Ini</span>
-                <span class="stat-value" id="weekLaporan">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Ditampilkan</span>
-                <span class="stat-value" id="displayedLaporan">0</span>
-            </div>
+        <div class="filter-group">
+            <label>📋 KATEGORI</label>
+            <select id="fKat">
+                <option value="all">Semua Kategori</option>
+            </select>
         </div>
-        
-        <div class="peta-legend">
-            <strong style="display: block; margin-bottom: 10px; font-size: 13px;">📌 Legenda</strong>
-            <div class="legend-item">
-                <div class="legend-icon" style="background: #ef6c00;"><i class="fas fa-exclamation"></i></div>
-                <span>Bencana</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background: #f57c00;"><i class="fas fa-bolt"></i></div>
-                <span>Infrastruktur</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background: #1976d2;"><i class="fas fa-water"></i></div>
-                <span>Banjir</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background: #d32f2f;"><i class="fas fa-shield"></i></div>
-                <span>Keamanan</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon" style="background: #388e3c;"><i class="fas fa-check"></i></div>
-                <span>Lainnya</span>
-            </div>
+        <div class="filter-group">
+            <label>🔍 CARI LOKASI / KETERANGAN</label>
+            <input type="text" id="fSearch" placeholder="Nama jalan, kelurahan..." onkeyup="render()">
         </div>
-        
-        <div class="loading" id="loadingIndicator" style="display: none;">
-            <div class="loading-spinner"></div>
-            <div>Memuat Data...</div>
+        <div style="text-align: right; font-size: 11px; color: #888; margin-top: 5px;">
+            <span id="countDisplay">0</span> data ditampilkan
         </div>
     </div>
-    
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stats-item">Total: <span id="totalAll">0</span></div>
+        <div class="stats-item">Minggu Ini: <span id="totalWeek">0</span></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div style="font-weight:bold; margin-bottom:5px;">Legenda</div>
+        <div id="legendContent"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loader"><i class="fas fa-spinner fa-spin"></i> Memuat Data...</div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <script>
-        const map = L.map('map').setView([1.6678611, 101.4333333], 13);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19
-        }).addTo(map);
-        
-        let allMarkers = [];
-        let allLaporan = [];
-        
-        const colors = {
-            "Bencana": "#ef6c00",
-            "Infrastruktur": "#f57c00",
-            "Banjir": "#1976d2",
-            "Keamanan": "#d32f2f",
-            "Kamtibmas": "#d32f2f",
-            "Lampu Jalan": "#f57c00",
-            "Penumpukan Sampah": "#388e3c",
+        // --- CONFIG ---
+        const map = L.map('map').setView([1.68, 101.44], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const COLORS = {
+            "Bencana": "#d32f2f",      // Merah
+            "Infrastruktur": "#f57c00", // Orange
+            "Banjir": "#0288d1",        // Biru
+            "Kamtibmas": "#7b1fa2",     // Ungu
+            "Lampu Jalan": "#fbc02d",   // Kuning
+            "Sampah": "#388e3c",        // Hijau
+            "Lainnya": "#616161"        // Abu
         };
-        
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+
+        let RAW_DATA = [];
+        let MARKERS = [];
+
+        // --- UTILS ---
+        function togglePanel() {
+            document.getElementById('panel').classList.toggle('panel-hidden');
         }
-        
-        function parseDate(str) {
-            if (!str) return new Date();
-            const parts = str.split(' ');
-            if (parts.length < 2) return new Date();
-            const [d, m, y] = parts[0].split('/');
-            if (!d || !m || !y) return new Date();
-            return new Date(`${y}-${m}-${d}T${parts[1]}`);
-        }
-        
-        function iconHtml(color) {
-            return `<div style="background: ${color}; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><i class="fas fa-map-pin" style="color: white; font-size: 14px;"></i></div>`;
-        }
-        
-        function popupHtml(item) {
-            const [t, n, k, l, f] = item;
-            const mapsUrl = l.includes('maps') ? l : `https://maps.google.com/?q=${l.match(/\d+\.\d+/g)?.join(',')}`;
-            
-            return `
-                <div class="popup-card">
-                    <div class="popup-header">${k}</div>
-                    <div class="popup-info"><strong>Pelapor:</strong> ${n}</div>
-                    <div class="popup-info"><strong>Waktu:</strong> ${t}</div>
-                    <div class="popup-info"><strong>Lokasi:</strong> ${l.includes('@') ? 'GPS ✓' : 'Terverifikasi'}</div>
-                    ${f ? `<div class="popup-foto"><img src="${f}" /></div>` : ''}
-                    <a href="${mapsUrl}" target="_blank" class="popup-link"><i class="fas fa-map"></i> Maps</a>
-                </div>
-            `;
-        }
-        
-        async function loadData() {
-            document.getElementById('loadingIndicator').style.display = 'block';
+
+        // Parsing Tanggal yang LEBIH KUAT (Handle DD/MM/YYYY dan YYYY-MM-DD)
+        function getWeekStr(dateStr) {
+            if(!dateStr) return "Tanggal Invalid";
             try {
-                const res = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
-                const data = await res.json();
-                allLaporan = data.laporan || [];
+                let d;
+                // Cek format DD/MM/YYYY
+                if(dateStr.includes('/')) {
+                    const [day, month, year] = dateStr.split(' ')[0].split('/');
+                    d = new Date(`${year}-${month}-${day}`);
+                } else {
+                    d = new Date(dateStr);
+                }
                 
-                document.getElementById('totalLaporan').innerText = allLaporan.length;
-                
-                populateFilters();
-                renderMarkers();
+                if(isNaN(d)) return "Tanggal Invalid";
+
+                // Hitung Minggu ke-X
+                d.setHours(0,0,0,0);
+                d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                const yearStart = new Date(d.getFullYear(),0,1);
+                const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+                return `Minggu ${weekNo} (${d.getFullYear()})`;
             } catch(e) {
-                console.error(e);
-                alert("Gagal muat peta");
-            } finally {
-                document.getElementById('loadingIndicator').style.display = 'none';
+                return "Tanggal Invalid";
             }
         }
-        
-        function populateFilters() {
-            const weeks = new Set();
-            const cats = new Set();
-            
-            allLaporan.forEach(item => {
-                const d = parseDate(item[0]);
-                const w = getWeekNumber(d);
-                weeks.add(`Minggu ${w} (${d.getFullYear()})`);
-                cats.add(item[2]);
-            });
-            
-            const wsel = document.getElementById('filterWeek');
-            Array.from(weeks).sort().reverse().forEach(w => {
-                const opt = document.createElement('option');
-                opt.value = w;
-                opt.text = w;
-                wsel.appendChild(opt);
-            });
-            
-            const ksel = document.getElementById('filterKategori');
-            Array.from(cats).sort().forEach(k => {
-                const opt = document.createElement('option');
-                opt.value = k;
-                opt.text = k;
-                ksel.appendChild(opt);
-            });
-        }
-        
-        function renderMarkers() {
-            allMarkers.forEach(m => map.removeLayer(m));
-            allMarkers = [];
-            
-            const w = document.getElementById('filterWeek').value;
-            const k = document.getElementById('filterKategori').value;
-            const s = document.getElementById('searchLokasi').value.toLowerCase();
-            
-            let cnt = 0;
-            
-            allLaporan.forEach(item => {
-                const [t, n, kat, l, f] = item;
-                const d = parseDate(t);
-                const wk = `Minggu ${getWeekNumber(d)} (${d.getFullYear()})`;
+
+        // --- MAIN LOGIC ---
+        async function init() {
+            try {
+                // Fetch Data
+                const req = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
+                const res = await req.json();
+                RAW_DATA = res.laporan || [];
+
+                // 1. Populate Filters
+                const weeks = new Set();
+                const cats = new Set();
+                let thisWeekCount = 0;
+                const currentWeekStr = getWeekStr(new Date().toLocaleDateString('en-GB')); // Format DD/MM/YYYY
+
+                RAW_DATA.forEach(row => {
+                    const w = getWeekStr(row[0]); // row[0] = timestamp
+                    weeks.add(w);
+                    cats.add(row[2]); // row[2] = kategori
+                    if(w === currentWeekStr) thisWeekCount++;
+                });
+
+                // Isi Select Minggu
+                const fWeek = document.getElementById('fWeek');
+                Array.from(weeks).sort().reverse().forEach(w => {
+                    let opt = document.createElement('option');
+                    opt.value = w;
+                    opt.innerText = w + (w === currentWeekStr ? " (Minggu Ini)" : "");
+                    fWeek.appendChild(opt);
+                });
+
+                // Isi Select Kategori
+                const fKat = document.getElementById('fKat');
+                Array.from(cats).sort().forEach(c => {
+                    let opt = document.createElement('option');
+                    opt.value = c;
+                    opt.innerText = c;
+                    fKat.appendChild(opt);
+                });
+
+                // Isi Stats & Legend
+                document.getElementById('totalAll').innerText = RAW_DATA.length;
+                document.getElementById('totalWeek').innerText = thisWeekCount;
+                renderLegend(cats);
+
+                // Render Awal
+                document.getElementById('loader').style.display = 'none';
                 
-                if ((w !== 'all' && w !== wk) || (k !== 'all' && k !== kat) || !l.toLowerCase().includes(s)) return;
+                // Default: Buka panel filter biar user tau ada filter, user bisa tutup sendiri
+                document.getElementById('panel').classList.remove('panel-hidden');
                 
-                const m = l.match(/(@)?(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if (!m) return;
-                
-                const marker = L.marker([parseFloat(m[2]), parseFloat(m[3])], {
-                    icon: L.divIcon({
-                        html: iconHtml(colors[kat] || '#2196f3'),
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 32],
-                        popupAnchor: [0, -32]
-                    })
-                }).bindPopup(popupHtml(item)).addTo(map);
-                
-                allMarkers.push(marker);
-                cnt++;
-            });
-            
-            document.getElementById('displayedLaporan').innerText = cnt;
-            
-            if (allMarkers.length > 0) {
-                const group = new L.featureGroup(allMarkers);
-                map.fitBounds(group.getBounds().pad(0.1), { maxZoom: 15 });
+                render();
+
+            } catch(e) {
+                alert("Gagal memuat data: " + e.message);
             }
         }
-        
-        document.getElementById('filterWeek').addEventListener('change', renderMarkers);
-        document.getElementById('filterKategori').addEventListener('change', renderMarkers);
-        document.getElementById('searchLokasi').addEventListener('input', renderMarkers);
-        
-        loadData();
+
+        function render() {
+            // Hapus marker lama
+            MARKERS.forEach(m => map.removeLayer(m));
+            MARKERS = [];
+
+            // Ambil value filter
+            const valWeek = document.getElementById('fWeek').value;
+            const valKat = document.getElementById('fKat').value;
+            const valSearch = document.getElementById('fSearch').value.toLowerCase();
+
+            let count = 0;
+
+            RAW_DATA.forEach(row => {
+                // row: [timestamp, pelapor, kategori, lokasi, foto, keterangan]
+                const [time, nama, kat, locRaw, foto, ket] = row;
+                
+                // Cek Filter
+                const w = getWeekStr(time);
+                if (valWeek !== 'all' && w !== valWeek) return;
+                if (valKat !== 'all' && kat !== valKat) return;
+                
+                // Cek Search (Lokasi atau Keterangan atau Pelapor)
+                const textSearch = (locRaw + " " + (ket||"") + " " + nama).toLowerCase();
+                if (valSearch && !textSearch.includes(valSearch)) return;
+
+                // Parse Lokasi
+                const coord = locRaw.match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if(!coord) return;
+
+                // Buat Marker
+                const lat = parseFloat(coord[1]);
+                const lng = parseFloat(coord[2]);
+                const color = COLORS[kat] || COLORS["Lainnya"];
+                
+                const icon = L.divIcon({
+                    className: 'custom-pin',
+                    html: `<div style="background:${color};width:24px;height:24px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`
+                });
+
+                const marker = L.marker([lat, lng], {icon: icon})
+                    .bindPopup(`
+                        <div class="popup-content">
+                            <div class="popup-row" style="color:${color};font-weight:bold;">${kat.toUpperCase()}</div>
+                            <div class="popup-row"><b>Pelapor:</b> ${nama}</div>
+                            <div class="popup-row"><b>Waktu:</b> ${time}</div>
+                            <div class="popup-row"><b>Ket:</b> ${ket || '-'}</div>
+                            ${foto ? `<img src="${foto}" class="popup-img" onerror="this.style.display='none'">` : ''}
+                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-maps">Buka Maps</a>
+                        </div>
+                    `);
+                
+                marker.addTo(map);
+                MARKERS.push(marker);
+                count++;
+            });
+
+            document.getElementById('countDisplay').innerText = count;
+            
+            // Auto Zoom jika ada hasil
+            if(MARKERS.length > 0) {
+                const group = new L.featureGroup(MARKERS);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        function renderLegend(cats) {
+            const el = document.getElementById('legendContent');
+            let html = '';
+            cats.forEach(c => {
+                const color = COLORS[c] || COLORS["Lainnya"];
+                html += `<div class="legend-item"><span class="dot" style="background:${color}"></span>${c}</div>`;
+            });
+            el.innerHTML = html;
+        }
+
+        // Event Listener buat Select
+        document.getElementById('fWeek').addEventListener('change', render);
+        document.getElementById('fKat').addEventListener('change', render);
+
+        // Start
+        init();
     </script>
 </body>
 </html>
