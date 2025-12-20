@@ -11,35 +11,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* CRITICAL FIX: HTML & Body harus 100% untuk Flexbox */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
         /* Layout Fix: Header - Map - Navbar */
         body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
             background: var(--dark);
         }
 
+        /* Header Fixed Height */
         .app-header {
-            flex-shrink: 0;
+            flex: 0 0 auto;
             z-index: 2000;
         }
 
+        /* Map Container: Flex Grow (Isi Ruang Tengah) */
         #map-wrapper {
-            flex-grow: 1;
+            flex: 1 1 auto;
             position: relative;
             width: 100%;
             background: #ddd;
+            overflow: hidden;
         }
 
+        /* Map 100% dari wrapper */
         #map {
             width: 100%;
             height: 100%;
             z-index: 1;
         }
 
+        /* Navbar Fixed Height */
         .bottom-nav {
-            flex-shrink: 0;
+            flex: 0 0 auto;
             z-index: 2000;
         }
 
@@ -66,6 +77,7 @@
             position: absolute;
             top: 50px; left: 10px;
             width: 280px;
+            max-width: calc(100vw - 30px);
             background: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 10px;
@@ -82,23 +94,84 @@
         }
 
         .filter-group { margin-bottom: 10px; }
-        .filter-group label { display: block; font-size: 10px; font-weight: bold; color: #666; margin-bottom: 3px; }
+        .filter-group label { 
+            display: block; 
+            font-size: 10px; 
+            font-weight: bold; 
+            color: #666; 
+            margin-bottom: 3px; 
+        }
         .filter-group select, .filter-group input {
-            width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 5px; font-size: 12px;
+            width: 100%; 
+            padding: 6px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 12px;
         }
 
-        /* Stats & Legend */
+        /* Stats */
         .map-stats {
-            position: absolute; bottom: 10px; left: 10px;
-            background: white; padding: 5px 10px; border-radius: 5px;
-            font-size: 10px; font-weight: bold; z-index: 900;
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px;
+            background: white; 
+            padding: 5px 10px; 
+            border-radius: 5px;
+            font-size: 10px; 
+            font-weight: bold; 
+            z-index: 900;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* Popup Styling */
-        .popup-content { width: 180px; font-size: 11px; }
-        .popup-content img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; margin: 5px 0; background: #eee; }
-        .btn-maps { display: block; background: var(--primary); color: white; text-align: center; padding: 5px; border-radius: 3px; text-decoration: none; margin-top: 5px; }
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        
+        .popup-content { 
+            width: 180px; 
+            font-size: 11px; 
+            line-height: 1.4;
+        }
+        
+        .popup-content b {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .popup-content img { 
+            width: 100%; 
+            height: 100px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            margin: 5px 0; 
+            background: #eee; 
+        }
+        
+        .btn-maps { 
+            display: block; 
+            background: var(--primary); 
+            color: white; 
+            text-align: center; 
+            padding: 5px; 
+            border-radius: 3px; 
+            text-decoration: none; 
+            margin-top: 5px; 
+            font-weight: 600;
+        }
+
+        /* Loading Indicator */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -114,26 +187,31 @@
     <div id="map-wrapper">
         <div id="map"></div>
 
+        <!-- Loading -->
+        <div id="loading" class="loading-overlay">
+            <div><i class="fas fa-spinner fa-spin"></i> Memuat Data...</div>
+        </div>
+
         <!-- Tombol Filter -->
         <button class="filter-toggle" onclick="toggleFilter()">
             <i class="fas fa-filter"></i> Filter
         </button>
 
         <!-- Panel Filter -->
-        <div id="filterPanel" class="filter-panel">
+        <div id="filterPanel" class="filter-panel hidden">
             <div class="filter-group">
-                <label>MINGGU KE-</label>
+                <label>📅 MINGGU KE-</label>
                 <select id="fWeek"><option value="all">Semua Data</option></select>
             </div>
             <div class="filter-group">
-                <label>KATEGORI</label>
+                <label>📋 KATEGORI</label>
                 <select id="fKat"><option value="all">Semua Kategori</option></select>
             </div>
             <div class="filter-group">
-                <label>CARI</label>
+                <label>🔍 CARI</label>
                 <input type="text" id="fSearch" placeholder="Lokasi / Pelapor..." onkeyup="render()">
             </div>
-            <div style="text-align:right; font-size:10px; color:#666">
+            <div style="text-align:right; font-size:10px; color:#666; margin-top:5px;">
                 <span id="countDisplay">0</span> data ditemukan
             </div>
         </div>
@@ -154,17 +232,40 @@
     <!-- SCRIPTS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- CONFIG & UTILS ---
-        const map = L.map('map').setView([1.68, 101.44], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        console.log("🗺️ Peta script starting...");
+
+        // --- CONFIG ---
+        const map = L.map('map', {
+            center: [1.68, 101.44],
+            zoom: 13,
+            zoomControl: true
+        });
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        // FIX: Invalidate size setelah map ready
+        setTimeout(() => {
+            map.invalidateSize();
+            console.log("✅ Map size invalidated");
+        }, 500);
 
         let RAW_DATA = [];
         let MARKERS = [];
+        
         const COLORS = {
-            "Bencana": "red", "Infrastruktur": "orange", "Banjir": "blue",
-            "Kamtibmas": "purple", "Lainnya": "gray"
+            "Bencana": "#d32f2f",
+            "Infrastruktur": "#f57c00",
+            "Banjir": "#0288d1",
+            "Kamtibmas": "#7b1fa2",
+            "Lampu Jalan": "#fbc02d",
+            "Penumpukan Sampah": "#388e3c",
+            "Lainnya": "#616161"
         };
 
+        // --- UTILS ---
         function toggleFilter() {
             document.getElementById('filterPanel').classList.toggle('hidden');
         }
@@ -173,66 +274,105 @@
             try {
                 if(!dateStr) return "Unknown";
                 let d;
+                
+                // Parse DD/MM/YYYY HH:MM:SS
                 if(dateStr.includes('/')) {
-                    const [day, month, year] = dateStr.split(' ')[0].split('/');
+                    const parts = dateStr.split(' ');
+                    const [day, month, year] = parts[0].split('/');
                     d = new Date(`${year}-${month}-${day}`);
                 } else {
                     d = new Date(dateStr);
                 }
+                
                 if(isNaN(d)) return "Unknown";
                 
-                // Hitung Minggu
-                const oneJan = new Date(d.getFullYear(),0,1);
-                const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
-                const week = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+                // Hitung minggu
+                const start = new Date(d.getFullYear(), 0, 1);
+                const diff = d - start;
+                const oneWeek = 1000 * 60 * 60 * 24 * 7;
+                const week = Math.ceil(diff / oneWeek);
+                
                 return `Minggu ${week} (${d.getFullYear()})`;
-            } catch(e) { return "Unknown"; }
+            } catch(e) { 
+                console.warn("Date parse error:", e);
+                return "Unknown"; 
+            }
         }
 
         // --- MAIN LOGIC ---
         async function loadData() {
             try {
+                console.log("📡 Fetching data...");
                 const res = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
                 const json = await res.json();
                 RAW_DATA = json.laporan || [];
+                
+                console.log(`✅ Loaded ${RAW_DATA.length} laporan`);
 
-                // 1. Populate Filters
+                if(RAW_DATA.length > 0) {
+                    console.log("📋 Sample:", RAW_DATA[0]);
+                }
+
+                // Populate Filters
                 const weeks = new Set();
                 const cats = new Set();
                 
                 RAW_DATA.forEach(row => {
                     weeks.add(getWeekStr(row[0]));
-                    cats.add(row[2]);
+                    cats.add(row[2]); // kategori
                 });
 
+                console.log("📅 Weeks found:", Array.from(weeks));
+                console.log("📋 Categories found:", Array.from(cats));
+
+                // Isi dropdown minggu
                 const fWeek = document.getElementById('fWeek');
                 Array.from(weeks).sort().reverse().forEach(w => {
-                    let opt = document.createElement('option');
-                    opt.value = w; opt.text = w; fWeek.appendChild(opt);
+                    const opt = document.createElement('option');
+                    opt.value = w; 
+                    opt.text = w; 
+                    fWeek.appendChild(opt);
                 });
 
+                // Isi dropdown kategori
                 const fKat = document.getElementById('fKat');
                 Array.from(cats).sort().forEach(c => {
-                    let opt = document.createElement('option');
-                    opt.value = c; opt.text = c; fKat.appendChild(opt);
+                    const opt = document.createElement('option');
+                    opt.value = c; 
+                    opt.text = c; 
+                    fKat.appendChild(opt);
                 });
 
                 document.getElementById('totalAll').innerText = RAW_DATA.length;
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Initial render
                 render();
 
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error("❌ Error loading data:", e);
+                alert("Gagal memuat data peta: " + e.message);
+            }
         }
 
         function render() {
+            console.log("🎯 Rendering markers...");
+            
+            // Hapus marker lama
             MARKERS.forEach(m => map.removeLayer(m));
             MARKERS = [];
 
             const w = document.getElementById('fWeek').value;
             const k = document.getElementById('fKat').value;
             const s = document.getElementById('fSearch').value.toLowerCase();
+            
+            console.log("🔍 Filters:", {week: w, cat: k, search: s});
+
             let count = 0;
 
-            RAW_DATA.forEach(row => {
+            RAW_DATA.forEach((row, idx) => {
                 const [time, nama, kat, locRaw, foto, ket] = row;
                 
                 // Filter Logic
@@ -242,27 +382,43 @@
                 const txt = (locRaw + " " + nama + " " + (ket||"")).toLowerCase();
                 if (s && !txt.includes(s)) return;
 
-                // Marker Logic
-                const coord = locRaw.match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
-                if (!coord) return;
+                // Parse koordinat
+                const coord = locRaw.match(/(@)?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                if (!coord) {
+                    console.warn(`⚠️ No coordinates in row ${idx}:`, locRaw);
+                    return;
+                }
 
-                const lat = parseFloat(coord[1]);
-                const lng = parseFloat(coord[2]);
-                const color = COLORS[kat] || "gray";
+                const lat = parseFloat(coord[2]);
+                const lng = parseFloat(coord[3]);
+                
+                if(isNaN(lat) || isNaN(lng)) {
+                    console.warn(`⚠️ Invalid coords in row ${idx}:`, lat, lng);
+                    return;
+                }
 
+                const color = COLORS[kat] || COLORS["Lainnya"];
+
+                // Create marker dengan icon sederhana
                 const icon = L.divIcon({
-                    className: 'custom-pin',
-                    html: `<div style="background:${color};width:20px;height:20px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)"></div>`
+                    className: 'custom-marker',
+                    html: `<div style="background:${color};width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.4);"></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12],
+                    popupAnchor: [0, -12]
                 });
 
                 const marker = L.marker([lat, lng], {icon: icon})
                     .bindPopup(`
                         <div class="popup-content">
-                            <b style="color:${color}">${kat}</b><br>
+                            <b style="color:${color}">${kat}</b>
                             <small>${time}</small><br>
-                            <b>${nama}</b>
-                            ${foto ? `<img src="${foto}">` : ''}
-                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-maps">Buka Maps</a>
+                            <strong>${nama}</strong>
+                            ${ket ? `<div style="font-size:10px;margin-top:3px;color:#666">${ket}</div>` : ''}
+                            ${foto ? `<img src="${foto}" onerror="this.style.display='none'">` : ''}
+                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="btn-maps">
+                                <i class="fas fa-map"></i> Buka Maps
+                            </a>
                         </div>
                     `);
                 
@@ -271,17 +427,21 @@
                 count++;
             });
 
+            console.log(`✅ Rendered ${count} markers`);
             document.getElementById('countDisplay').innerText = count;
             
+            // Auto zoom ke marker
             if(MARKERS.length > 0) {
                 const group = new L.featureGroup(MARKERS);
-                map.fitBounds(group.getBounds().pad(0.1));
+                map.fitBounds(group.getBounds().pad(0.1), {maxZoom: 15});
             }
         }
 
+        // Event Listeners
         document.getElementById('fWeek').addEventListener('change', render);
         document.getElementById('fKat').addEventListener('change', render);
 
+        // Start
         loadData();
     </script>
 </body>
