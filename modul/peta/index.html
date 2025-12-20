@@ -1,28 +1,566 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Peta Sebaran Laporan</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Sebaran Laporan - Garda Dumai Kota</title>
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>#map { height: 100vh; width: 100%; }</style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="../../css/style.css" />
+    
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--dark);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        
+        #map {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+        
+        .map-container {
+            position: relative;
+            height: 100vh;
+        }
+        
+        /* Header */
+        .peta-header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 999;
+            max-width: 400px;
+        }
+        
+        .peta-header h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .filter-group {
+            margin-bottom: 12px;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(33, 128, 141, 0.1);
+        }
+        
+        /* Statistics */
+        .peta-stats {
+            position: absolute;
+            bottom: 20px;
+            left: 10px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 999;
+            max-width: 350px;
+            font-size: 13px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label { color: #666; font-weight: 500; }
+        .stat-value { font-weight: 700; color: var(--primary); }
+        
+        /* Legend */
+        .peta-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 999;
+            max-width: 200px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item:last-child { margin-bottom: 0; }
+        
+        .legend-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        /* Popup Custom */
+        .leaflet-popup-content {
+            width: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .popup-card {
+            padding: 12px;
+            min-width: 250px;
+        }
+        
+        .popup-header {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .popup-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .popup-info strong {
+            min-width: 80px;
+            color: #333;
+        }
+        
+        .popup-foto {
+            margin-top: 10px;
+        }
+        
+        .popup-foto img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .popup-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .popup-link:hover {
+            background: var(--primary-hover);
+        }
+        
+        /* Loading */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #ddd;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .peta-header {
+                max-width: 100%;
+                left: 5px;
+                right: 5px;
+                top: 5px;
+            }
+            
+            .peta-stats {
+                max-width: 100%;
+                left: 5px;
+                right: auto;
+            }
+            
+            .peta-legend {
+                max-width: 100%;
+                left: 5px;
+                right: 5px;
+                bottom: auto;
+                top: auto;
+            }
+        }
+    </style>
 </head>
-<body style="margin:0;">
-    <div id="map"></div>
+<body>
+    <div class="map-container">
+        <div id="map"></div>
+        
+        <!-- Header Controls -->
+        <div class="peta-header">
+            <h3><i class="fas fa-map-location-dot"></i> Filter Laporan</h3>
+            
+            <div class="filter-group">
+                <label>📅 Minggu</label>
+                <select id="filterWeek">
+                    <option value="all">Semua Minggu</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>📋 Kategori</label>
+                <select id="filterKategori">
+                    <option value="all">Semua Kategori</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>🔍 Cari Lokasi</label>
+                <input type="text" id="searchLokasi" placeholder="Ketik nama jalan..." />
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="peta-stats">
+            <div class="stat-item">
+                <span class="stat-label">Total Laporan</span>
+                <span class="stat-value" id="totalLaporan">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Minggu Ini</span>
+                <span class="stat-value" id="weekLaporan">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Ditampilkan</span>
+                <span class="stat-value" id="displayedLaporan">0</span>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="peta-legend">
+            <strong style="display: block; margin-bottom: 10px;">Legenda Kategori</strong>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: #ef6c00;"><i class="fas fa-exclamation"></i></div>
+                <span>Bencana</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: #f57c00;"><i class="fas fa-lightbulb"></i></div>
+                <span>Infrastruktur</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: #1976d2;"><i class="fas fa-water"></i></div>
+                <span>Banjir</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon" style="background: #388e3c;"><i class="fas fa-check"></i></div>
+                <span>Lainnya</span>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div class="loading" id="loadingIndicator" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div>Memuat Data...</div>
+        </div>
+    </div>
+    
+    <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+    
     <script>
-        const map = L.map('map').setView([1.68, 101.44], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        async function loadMarkers() {
+        // ========== INISIALISASI MAP ==========
+        const map = L.map('map').setView([1.6678611, 101.4333333], 13);
+        
+        // Layer OSM
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Layer Satellite
+        const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles © Esri',
+            maxZoom: 18
+        });
+        
+        // Layer Control
+        L.control.layers({
+            "OpenStreetMap": osmLayer,
+            "Satellite": satLayer
+        }).addTo(map);
+        
+        // ========== DATA & VARIABLES ==========
+        let allMarkers = [];
+        let allLaporan = [];
+        const categoryColors = {
+            "Bencana": "#ef6c00",
+            "Infrastruktur": "#f57c00",
+            "Banjir": "#1976d2",
+            "Kamtibmas": "#d32f2f",
+            "Lampu Jalan": "#f57c00",
+            "Penumpukan Sampah": "#388e3c",
+        };
+        
+        // ========== FUNGSI HELPER ==========
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        function getWeekLabel(date) {
+            const week = getWeekNumber(date);
+            const year = date.getFullYear();
+            return `Minggu ${week} (${year})`;
+        }
+        
+        function parseDate(dateStr) {
+            const [date, time] = dateStr.split(' ');
+            const [d, m, y] = date.split('/');
+            return new Date(`${y}-${m}-${d}T${time}`);
+        }
+        
+        function getMarkerColor(kategori) {
+            return categoryColors[kategori] || "#2196f3";
+        }
+        
+        function createMarkerIcon(color) {
+            return L.divIcon({
+                html: `<div style="background: ${color}; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><i class="fas fa-location-dot" style="color: white; font-size: 14px;"></i></div>`,
+                iconSize: [32, 32],
+                className: 'custom-marker'
+            });
+        }
+        
+        function createPopup(item) {
+            const [timestamp, nama, kategori, lokasi, foto] = item;
+            const mapsUrl = lokasi.includes('maps.google.com') ? lokasi : `https://maps.google.com/?q=${lokasi}`;
+            
+            return `
+                <div class="popup-card">
+                    <div class="popup-header">${kategori}</div>
+                    <div class="popup-info">
+                        <strong>Pelapor:</strong>
+                        <span>${nama}</span>
+                    </div>
+                    <div class="popup-info">
+                        <strong>Waktu:</strong>
+                        <span>${timestamp}</span>
+                    </div>
+                    <div class="popup-info">
+                        <strong>Lokasi:</strong>
+                        <span>${lokasi.includes('@') ? 'GPS Terkunci ✓' : lokasi}</span>
+                    </div>
+                    ${foto ? `
+                        <div class="popup-foto">
+                            <img src="${foto}" alt="Foto Laporan" />
+                        </div>
+                    ` : ''}
+                    <a href="${mapsUrl}" target="_blank" class="popup-link">
+                        <i class="fas fa-map"></i> Buka di Maps
+                    </a>
+                </div>
+            `;
+        }
+        
+        // ========== LOAD DATA ==========
+        async function loadData() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
             try {
                 const res = await fetch("https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec");
                 const data = await res.json();
-                data.laporan.forEach(item => {
-                    const loc = item[3].match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
-                    if(loc) L.marker([loc[1], loc[2]]).addTo(map).bindPopup("<b>" + item[2] + "</b><br>" + item[4]);
-                });
-            } catch(e) { console.log("Gagal muat peta"); }
+                
+                allLaporan = data.laporan || [];
+                console.log(`✅ Loaded ${allLaporan.length} laporan`);
+                
+                // Update statistics
+                document.getElementById('totalLaporan').innerText = allLaporan.length;
+                
+                // Populate filters
+                populateFilters();
+                
+                // Initial render
+                renderMarkers();
+                
+            } catch(e) {
+                console.error("❌ Gagal muat data:", e);
+                alert("Gagal memuat data peta. Cek koneksi internet.");
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
         }
-        loadMarkers();
+        
+        // ========== POPULATE FILTERS ==========
+        function populateFilters() {
+            // Week filter
+            const weeks = new Set();
+            const today = new Date();
+            const thisWeek = getWeekLabel(today);
+            
+            allLaporan.forEach(item => {
+                const date = parseDate(item[0]);
+                weeks.add(getWeekLabel(date));
+            });
+            
+            const weekSelect = document.getElementById('filterWeek');
+            Array.from(weeks).sort().reverse().forEach(week => {
+                const option = document.createElement('option');
+                option.value = week;
+                option.text = week + (week === thisWeek ? ' (Minggu Ini)' : '');
+                weekSelect.appendChild(option);
+            });
+            
+            // Category filter
+            const categories = new Set();
+            allLaporan.forEach(item => categories.add(item[2]));
+            
+            const katSelect = document.getElementById('filterKategori');
+            Array.from(categories).sort().forEach(kat => {
+                const option = document.createElement('option');
+                option.value = kat;
+                option.text = kat;
+                katSelect.appendChild(option);
+            });
+        }
+        
+        // ========== RENDER MARKERS ==========
+        function renderMarkers() {
+            // Clear existing markers
+            allMarkers.forEach(m => map.removeLayer(m));
+            allMarkers = [];
+            
+            const filterWeek = document.getElementById('filterWeek').value;
+            const filterKat = document.getElementById('filterKategori').value;
+            const searchText = document.getElementById('searchLokasi').value.toLowerCase();
+            
+            let weekCount = 0;
+            
+            allLaporan.forEach(item => {
+                const [timestamp, nama, kategori, lokasi, foto] = item;
+                const date = parseDate(timestamp);
+                const weekLabel = getWeekLabel(date);
+                
+                // Filter logic
+                const matchWeek = filterWeek === 'all' || weekLabel === filterWeek;
+                const matchKat = filterKat === 'all' || kategori === filterKat;
+                const matchSearch = lokasi.toLowerCase().includes(searchText);
+                
+                if (!matchWeek || !matchKat || !matchSearch) return;
+                
+                // Parse coordinates
+                const coordMatch = lokasi.match(/@?(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (!coordMatch) return;
+                
+                const [, lat, lng] = coordMatch;
+                
+                // Create marker
+                const color = getMarkerColor(kategori);
+                const marker = L.marker([lat, lng], {
+                    icon: createMarkerIcon(color)
+                })
+                    .bindPopup(createPopup(item), { maxWidth: 300 })
+                    .addTo(map);
+                
+                allMarkers.push(marker);
+                
+                if (filterWeek === 'all' || weekLabel === filterWeek) {
+                    weekCount++;
+                }
+            });
+            
+            // Update statistics
+            document.getElementById('weekLaporan').innerText = weekCount;
+            document.getElementById('displayedLaporan').innerText = allMarkers.length;
+            
+            // Auto fit bounds
+            if (allMarkers.length > 0) {
+                const group = new L.featureGroup(allMarkers);
+                map.fitBounds(group.getBounds().pad(0.1), { maxZoom: 15 });
+            }
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        document.getElementById('filterWeek').addEventListener('change', renderMarkers);
+        document.getElementById('filterKategori').addEventListener('change', renderMarkers);
+        document.getElementById('searchLokasi').addEventListener('input', renderMarkers);
+        
+        // ========== INIT ==========
+        loadData();
+        
+        console.log("✅ peta.js loaded");
     </script>
 </body>
 </html>
