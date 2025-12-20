@@ -48,17 +48,23 @@ self.addEventListener('fetch', (event) => {
   // Hanya GET yang di-handle
   if (req.method !== 'GET') return;
 
-  // API eksternal (BMKG, Google Script, OSM/Nominatim) -> selalu network first
+  // ===== JANGAN CACHE: Host-host ini langsung fetch biasa =====
+  // Nominatim (tracking lokasi 3 baris)
+  // ImgBB (upload foto)
+  // BMKG (data gempa/cuaca/ekstrem)
+  // Google (kirim laporan ke Sheets)
+  // CDN (Font Awesome)
   if (
-    url.hostname.includes('bmkg.go.id') ||
-    url.hostname.includes('google.com') ||
+    url.hostname.includes('nominatim.openstreetmap.org') ||
+    url.hostname.includes('api.imgbb.com') ||
+    url.hostname.includes('data.bmkg.go.id') ||
+    url.hostname.includes('api.bmkg.go.id') ||
+    url.hostname.includes('script.google.com') ||
     url.hostname.includes('googleapis.com') ||
-    url.hostname.includes('openstreetmap.org') ||
-    url.hostname.includes('tile.') ||
-    url.hostname.includes('nominatim') ||
     url.hostname.includes('cdnjs.cloudflare.com')
   ) {
-    event.respondWith(fetch(req).catch(() => caches.match(req)));
+    // Langsung fetch, jangan cache
+    event.respondWith(fetch(req));
     return;
   }
 
