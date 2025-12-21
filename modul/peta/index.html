@@ -17,52 +17,104 @@
         #map { width: 100%; height: 100%; z-index: 1; }
         .bottom-nav { flex: 0 0 auto; z-index: 2000; }
 
+        /* Stats - Bottom Left */
         .map-stats {
-            position: absolute; bottom: 10px; left: 10px;
-            background: white; padding: 8px 12px; border-radius: 8px;
-            font-size: 11px; font-weight: bold; z-index: 900;
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px;
+            background: white; 
+            padding: 8px 12px; 
+            border-radius: 8px;
+            font-size: 11px; 
+            font-weight: bold; 
+            z-index: 900;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
+        /* LEGENDA - PINDAH KE KANAN ATAS (tidak bentrok navbar) */
         .legend {
-            position: absolute; bottom: 10px; right: 10px;
-            background: white; padding: 10px; border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 900;
-            font-size: 10px; max-width: 140px;
+            position: absolute; 
+            top: 10px;        /* ← UBAH dari bottom ke top */
+            right: 10px;      /* ← Tetap di kanan */
+            background: white; 
+            padding: 10px; 
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            z-index: 900;
+            font-size: 10px; 
+            max-width: 140px;
         }
-        .legend strong { display: block; margin-bottom: 8px; font-size: 11px; }
-        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        
+        .legend strong { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-size: 11px; 
+            color: #333;
+        }
+        
+        .legend-item { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 5px; 
+        }
+        
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        
         .legend-dot {
-            width: 12px; height: 12px; border-radius: 50%; margin-right: 6px;
-            flex-shrink: 0; border: 2px solid white; box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            margin-right: 6px;
+            flex-shrink: 0; 
+            border: 2px solid white; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
+        /* Loading */
         .loading {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7); display: flex; align-items: center;
-            justify-content: center; z-index: 2000; color: white; font-size: 14px;
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); 
+            display: flex; 
+            align-items: center;
+            justify-content: center; 
+            z-index: 2000; 
+            color: white; 
+            font-size: 14px;
+        }
+
+        /* Popup Style */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
+    <!-- HEADER -->
     <div class="app-header">
         <a href="../../index.html" class="header-icon"><i class="fas fa-arrow-left"></i></a>
         <h1>PETA SEBARAN</h1>
         <div class="header-icon"></div>
     </div>
 
+    <!-- MAP -->
     <div id="map-wrapper">
         <div id="map"></div>
 
+        <!-- Loading -->
         <div id="loading" class="loading">
             <div><i class="fas fa-spinner fa-spin"></i> Memuat Data...</div>
         </div>
 
+        <!-- Stats (Bottom Left) -->
         <div class="map-stats">
             <span id="statsText">Memuat...</span>
         </div>
 
+        <!-- LEGENDA (Top Right - tidak bentrok navbar) -->
         <div class="legend">
             <strong>📍 Kategori</strong>
             <div class="legend-item">
@@ -88,12 +140,14 @@
         </div>
     </div>
 
+    <!-- NAVBAR -->
     <nav class="bottom-nav">
         <a href="../../index.html" class="nav-item"><i class="fas fa-house"></i>Home</a>
         <a href="index.html" class="nav-item active"><i class="fas fa-map-location-dot"></i>Peta</a>
         <a href="../operator/index.html" class="nav-item"><i class="fas fa-plus-circle"></i>Lapor</a>
     </nav>
 
+    <!-- SCRIPTS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const map = L.map('map').setView([1.68, 101.44], 13);
@@ -101,8 +155,11 @@
         setTimeout(() => map.invalidateSize(), 300);
 
         const COLORS = {
-            "Bencana": "#d32f2f", "Infrastruktur": "#f57c00", "Banjir": "#0288d1",
-            "Kamtibmas": "#7b1fa2", "Lainnya": "#388e3c"
+            "Bencana": "#d32f2f", 
+            "Infrastruktur": "#f57c00", 
+            "Banjir": "#0288d1",
+            "Kamtibmas": "#7b1fa2", 
+            "Lainnya": "#388e3c"
         };
 
         async function loadData() {
@@ -118,12 +175,6 @@
                     document.getElementById('loading').style.display = 'none';
                     return;
                 }
-
-                // DEBUG: Print semua kolom dari row pertama
-                console.log("🔍 DEBUG KOLOM:");
-                data[0].forEach((col, idx) => {
-                    console.log(`  [${idx}] = "${col}"`);
-                });
 
                 let markerCount = 0;
 
@@ -143,13 +194,11 @@
                             lat = parseFloat(match[1]);
                             lng = parseFloat(match[2]);
                             lokasi = col;
-                            console.log(`✓ Row ${idx}: Found coords in column [${i}]`);
                             break;
                         }
                     }
 
                     if(!lat || !lng || isNaN(lat) || isNaN(lng)) {
-                        console.warn(`⚠️ Row ${idx}: No valid coords found`);
                         return;
                     }
 
@@ -158,6 +207,7 @@
                     const nama = row[1] || "Pelapor";
                     const kat = row[2] || "Lainnya";
                     const foto = row[4] || "";
+                    const keterangan = row[5] || "";
 
                     const color = COLORS[kat] || COLORS["Lainnya"];
                     
@@ -170,13 +220,14 @@
 
                     const marker = L.marker([lat, lng], {icon: icon})
                         .bindPopup(`
-                            <div style="width:200px;font-size:11px;line-height:1.4;">
+                            <div style="width:200px;font-size:11px;line-height:1.5;">
                                 <b style="color:${color};font-size:13px;">${kat}</b><br>
                                 <small style="color:#888">${timestamp}</small><br>
                                 <strong>${nama}</strong>
-                                ${foto ? `<img src="${foto}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin:8px 0;background:#eee;" onerror="this.style.display='none'">` : ''}
+                                ${keterangan ? `<div style="font-size:10px;color:#666;margin-top:5px;">${keterangan}</div>` : ''}
+                                ${foto ? `<img src="${foto}" style="width:100%;height:120px;object-fit:cover;border-radius:4px;margin:8px 0;background:#eee;" onerror="this.style.display='none'">` : ''}
                                 <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" style="display:block;background:${color};color:white;text-align:center;padding:6px;border-radius:4px;text-decoration:none;margin-top:8px;font-weight:600;">
-                                    <i class="fas fa-map-marker-alt"></i> Buka Maps
+                                    <i class="fas fa-map-marker-alt"></i> Buka di Maps
                                 </a>
                             </div>
                         `);
@@ -187,10 +238,10 @@
 
                 console.log(`✅ ${markerCount} markers rendered`);
                 
-                document.getElementById('statsText').innerText = `${markerCount} Laporan Ditampilkan`;
+                document.getElementById('statsText').innerText = `${markerCount} Laporan`;
                 document.getElementById('loading').style.display = 'none';
 
-                // Auto zoom
+                // Auto zoom ke semua marker
                 if(markerCount > 0) {
                     setTimeout(() => {
                         const bounds = [];
@@ -203,8 +254,6 @@
                             map.fitBounds(L.latLngBounds(bounds).pad(0.1), {maxZoom: 15});
                         }
                     }, 500);
-                } else {
-                    alert("❌ Tidak ada marker yang bisa ditampilkan.\n\nPastikan data laporan memiliki koordinat GPS!");
                 }
 
             } catch(e) {
