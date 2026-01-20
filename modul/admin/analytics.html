@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Camat</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .metric-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
+        .metric-number { font-size: 32px; font-weight: bold; color: var(--primary); }
+        .metric-label { font-size: 12px; color: #666; margin-top: 5px; }
+        .chart-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 20px 0; }
+        canvas { max-height: 300px; }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <a href="login.html" class="header-icon"><i class="fas fa-arrow-left"></i></a>
+        <h1>ANALYTICS DASHBOARD</h1>
+        <a onclick="logout()" class="header-icon"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+
+    <div class="container">
+        <!-- Stats Utama -->
+        <div class="analytics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Laporan Bulan Ini</div>
+                <div class="metric-number" id="totalReport">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Laporan Diproses</div>
+                <div class="metric-number" id="processedReport">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Laporan Selesai</div>
+                <div class="metric-number" id="resolvedReport">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Laporan Pending</div>
+                <div class="metric-number" id="pendingReport">0</div>
+            </div>
+        </div>
+
+        <!-- Chart Laporan Per Minggu -->
+        <div class="chart-container">
+            <h3>Tren Laporan Per Minggu</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <!-- Chart Kategori -->
+        <div class="chart-container">
+            <h3>Distribusi Laporan per Kategori</h3>
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="../../push-notification.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Check authorization
+        proteksiHalaman('admin');
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('https://script.google.com/macros/s/AKfycbwCKYJOQyULCxf5skOQ5AC9BpgR9beG3Uw3M1iMTEOoUgkRPvtGlybwK9iz19PGD0P5ww/exec');
+                const data = await res.json();
+                const laporan = data.laporan || [];
+
+                // Calculate stats
+                document.getElementById('totalReport').innerText = laporan.length;
+                document.getElementById('processedReport').innerText = laporan.filter(r => r[6] === 'Diproses').length;
+                document.getElementById('resolvedReport').innerText = laporan.filter(r => r[6] === 'Selesai').length;
+                document.getElementById('pendingReport').innerText = laporan.filter(r => r[6] === 'Baru').length;
+
+                // Group by week
+                const weekData = {};
+                laporan.forEach(r => {
+                    const date = new Date(r[0]);
+                    const week = 'W' + Math.ceil((date.getDate()) / 7);
+                    weekData[week] = (weekData[week] || 0) + 1;
+                });
+
+                // Chart 1: Trend
+                const trendCtx = document.getElementById('trendChart').getContext('2d');
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(weekData),
+                        datasets: [{
+                            label: 'Laporan',
+                            data: Object.values(weekData),
+                            borderColor: '#2180a8',
+                            backgroundColor: 'rgba(33, 128, 168, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+
+                // Group by category
+                const categoryData = {};
+                laporan.forEach(r => {
+                    const cat = r[2];
+                    categoryData[cat] = (categoryData[cat] || 0) + 1;
+                });
+
+                // Chart 2: Kategori
+                const catCtx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(catCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(categoryData),
+                        datasets: [{
+                            data: Object.values(categoryData),
+                            backgroundColor: ['#d32f2f', '#f57c00', '#0288d1', '#7b1fa2', '#388e3c']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+            } catch(e) {
+                console.error(e);
+                alert('Gagal memuat analytics');
+            }
+        }
+
+        loadAnalytics();
+        setInterval(loadAnalytics, 60000); // Reload setiap 1 menit
+    </script>
+</body>
+</html>
